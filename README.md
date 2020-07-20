@@ -7,7 +7,7 @@ This package provides an SDK for Rasa chatbots written in Go.
 
 ## Rasa Features
 
-This package implements the SDK based on the specifications for `Rasa 1.19.*`.
+This package implements the SDK based on the specifications for `Rasa 1.9.*`.
 
 **Features:**
 
