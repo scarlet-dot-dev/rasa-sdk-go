@@ -50,7 +50,7 @@ type Handler interface {
 	SlotMappers() Mappers
 
 	// Validator returns a custom validator for the slot. If no custom
-	// validation is needed, this method should return nil.
+	// validation is needed, the method can return DefaultValidator(slot).
 	//
 	// A default implementation of Validator can be provided by embedding
 	// `HandlerDefaults`.
@@ -89,7 +89,7 @@ func (DefaultEmbed) SlotMappers() Mappers {
 // Validator returns a custom validator for the slot. If no custom
 // validation is needed, this method should return nil.
 func (DefaultEmbed) Validator(slot string) Validator {
-	return nil
+	return DefaultValidator(slot)
 }
 
 // Deactivate TODO

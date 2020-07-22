@@ -16,8 +16,12 @@ type Validator interface {
 		ctx *Context,
 		dispatcher *action.CollectingDispatcher,
 		value interface{},
-	) (slots rasa.SlotMap, err error)
+	) (slots rasa.Slots, err error)
 }
+
+// ensure interface
+var _ Validator = (ValidatorFunc)(nil)
+var _ Validator = (DefaultValidator)("")
 
 // ValidatorFunc is a wrapper type for functions that may be used as Validator
 // implementations.
@@ -25,12 +29,25 @@ type ValidatorFunc func(
 	ctx *Context,
 	dispatcher *action.CollectingDispatcher,
 	value interface{},
-) (rasa.SlotMap, error)
-
-// ensure interface
-var _ Validator = (ValidatorFunc)(nil)
+) (rasa.Slots, error)
 
 // Validate implements Validator.
-func (fn ValidatorFunc) Validate(ctx *Context, dispatcher *action.CollectingDispatcher, value interface{}) (rasa.SlotMap, error) {
+func (fn ValidatorFunc) Validate(ctx *Context, dispatcher *action.CollectingDispatcher, value interface{}) (rasa.Slots, error) {
 	return fn(ctx, dispatcher, value)
+}
+
+// DefaultValidator implements the Validator interface for simple cases where
+// custom validation is not required.
+type DefaultValidator string
+
+//
+func (v DefaultValidator) Validate(
+	ctx *Context,
+	dispatcher *action.CollectingDispatcher,
+	value interface{},
+) (slots rasa.Slots, err error) {
+	slots = rasa.Slots{
+		string(v): value,
+	}
+	return
 }

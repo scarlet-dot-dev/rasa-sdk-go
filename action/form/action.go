@@ -2,6 +2,7 @@ package form
 
 import (
 	"fmt"
+	"time"
 
 	"go.scarlet.dev/rasa"
 	"go.scarlet.dev/rasa/action"
@@ -78,10 +79,15 @@ func (a *Action) Run(
 //
 type eventCapture rasa.Events
 
+// appemd
+func (c *eventCapture) append(e ...rasa.Event) {
+	*c = append(*c, e...)
+}
+
 //
-func (c *eventCapture) capture(e rasa.Events, er error) (added bool, err error) {
-	if err = er; err == nil && len(e) > 0 {
-		*c = append(*c)
+func (c *eventCapture) capture(e rasa.Events, ce error) (added bool, err error) {
+	if err = ce; err == nil && len(e) > 0 {
+		c.append(e...)
 		added = true
 	}
 	return
@@ -127,10 +133,48 @@ func (a *Action) String() string {
 // will be returned.
 func (a *Action) activateIfRequired(
 	ctx *Context,
-	dispatcher *action.CollectingDispatcher,
+	disp *action.CollectingDispatcher,
 ) (events rasa.Events, err error) {
-	// logger := action.
-	// UNIMPLEMENTED
+	ec := (*eventCapture)(&events)
+
+	if ctx.Tracker.HasActiveForm() {
+		ctx.Debugf("the form [%s] is active", ctx.Tracker.ActiveForm.Name)
+	} else {
+		ctx.Debugf("there is no active form", ctx.Tracker.ActiveForm.Name)
+	}
+
+	if ctx.Tracker.ActiveForm.Is(a.Handler.FormName()) {
+		// we are active - nothing to do
+		return
+	}
+
+	// activate the form
+	ec.append(rasa.Form{
+		Timestamp: rasa.Time(time.Now()),
+		Name:      a.Handler.FormName(),
+	})
+
+	//
+	prefilledSlots := make(rasa.Slots)
+	requiredSlots := a.Handler.RequiredSlots(ctx)
+	for _, slot := range requiredSlots {
+		if !ctx.shouldRequestSlot(slot) {
+			prefilledSlots[slot] = ctx.Tracker.Slots[slot]
+		}
+	}
+
+	// if there are no prefilled slots, we are done
+	if len(prefilledSlots) == 0 {
+		ctx.Debugf("no pre-filled required slots to validate")
+		return
+	}
+
+	// validate the prefilled slots
+	ctx.Debugf("validating pre-filled required slots: %s", prefilledSlots)
+	if _, err = ec.capture(a.ValidateSlots(ctx, disp, prefilledSlots)); err != nil {
+		return
+	}
+
 	return
 }
 
@@ -138,4 +182,34 @@ func (a *Action) activateIfRequired(
 func (a *Action) validateIfRequired(ctx *Context, disp *action.CollectingDispatcher) (events rasa.Events, err error) {
 	// UNIMPLEMENTED
 	return nil, nil
+}
+
+// ValidateSlots TODO
+func (a *Action) ValidateSlots(
+	ctx *Context,
+	disp *action.CollectingDispatcher,
+	slots rasa.Slots,
+) (events rasa.Events, err error) {
+	sc := make(rasa.Slots)
+
+	for slot, value := range slots {
+		validator := a.Handler.Validator(slot)
+
+		var sset rasa.Slots
+		if sset, err = validator.Validate(ctx, disp, value); err != nil {
+			return
+		}
+		sc.Update(sset)
+	}
+
+	// turn validated slots into SlotSet events
+	timestamp := rasa.Time(time.Now())
+	for key := range sc {
+		events = append(events, rasa.SlotSet{
+			Timestamp: timestamp,
+			Key:       key,
+			Value:     sc[key],
+		})
+	}
+	return
 }

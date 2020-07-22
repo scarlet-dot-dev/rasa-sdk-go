@@ -18,8 +18,7 @@ type Context struct {
 
 // Check whether form action should request given slot.
 func (c *Context) shouldRequestSlot(slot string) bool {
-	_, exists := c.Tracker.Slots[slot]
-	return !exists
+	return !c.Tracker.Slots.Has(slot)
 }
 
 //

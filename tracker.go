@@ -4,12 +4,14 @@
 
 package rasa
 
+import "fmt"
+
 // Tracker contains the state of the Tracker sent to the action server by the
 // Rasa engine.
 type Tracker struct {
 	ConversationID     string       `json:"conversation_id"`
 	SenderID           string       `json:"sender_id"` // TODO(ed): verify if this field is ever set
-	Slots              SlotMap      `json:"slots,omitempty"`
+	Slots              Slots        `json:"slots,omitempty"`
 	LatestMessage      *ParseResult `json:"latest_message,omitempty"`
 	LatestActionName   string       `json:"latest_action_name,omitempty"`
 	LatestEventTime    Time         `json:"latest_event_time,omitempty"`
@@ -92,11 +94,25 @@ type Entity struct {
 	Confidence float64 `json:"confidence"`
 }
 
-// SlotMap is a wrapper type around slots.
-type SlotMap map[string]interface{}
+// Slots is a wrapper type around slots.
+type Slots map[string]interface{}
 
-// Has returns true if the SlotMap contains the requested Slot.
-func (m SlotMap) Has(slot string) bool {
-	_, exists := m[slot]
-	return exists
+// Has returns true if the Slots contains the requested Slot.
+func (m Slots) Has(slot string) bool {
+	val, exists := m[slot]
+	return exists && val != nil
+}
+
+// Update will copy the values present in s into m.
+func (m Slots) Update(s Slots) {
+	for key := range s {
+		m[key] = s[key]
+	}
+}
+
+// String implements fmt.Stringer.
+//
+// String returns a simple json-like representation of the map's values.
+func (m Slots) String() string {
+	return fmt.Sprintf("%#v", m)
 }
