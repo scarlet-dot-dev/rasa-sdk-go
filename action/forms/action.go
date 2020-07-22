@@ -34,27 +34,23 @@ func (a *Action) Run(
 	actx *action.Context,
 	disp *action.CollectingDispatcher,
 ) (events []rasa.Event, err error) {
-	var add []rasa.Event
+	ec := (*eventCapture)(&events)
 
 	// form context for Handler methods
 	fctx := Context{actx}
 
 	// first ensure the form is activated
-	if add, err = a.activateIfRequired(&fctx, disp); err != nil {
+	if _, err = ec.capture(a.activateIfRequired(&fctx, disp)); err != nil {
 		return
-	} else if len(add) > 0 {
-		events = append(events, add...)
 	}
 
 	// validate if needed
-	if add, err = a.validateIfRequired(&fctx, disp); err != nil {
+	if _, err = ec.capture(a.validateIfRequired(&fctx, disp)); err != nil {
 		return
-	} else if len(add) > 0 {
-		events = append(events, add...)
 	}
 
 	// if validation caused the form to be deactivated, abort
-	if containsFormDeactivate(events) {
+	if containsFormDeactivate(*ec) {
 		return
 	}
 
@@ -62,17 +58,32 @@ func (a *Action) Run(
 	a.applySlotSets(fctx.Tracker, events)
 
 	// get the next slot request events
-	if add, err = a.requestNextSlot(&fctx, disp); err != nil {
-		return
-	} else if len(add) > 0 {
-		events = append(events, add...)
+	var added bool
+	if added, err = ec.capture(a.Handler.RequestNextSlot(&fctx, disp)); err != nil || !added {
 		return
 	}
 
-	// no new events - submit the form
+	// no new events - submit the form AND deactivate
+	if _, err = ec.capture(a.Handler.Submit(&fctx, disp)); err != nil {
+		return
+	}
+	if _, err = ec.capture(a.Handler.Deactivate()); err != nil {
+		return
+	}
 
-	//
+	// done
+	return
+}
 
+//
+type eventCapture []rasa.Event
+
+//
+func (c *eventCapture) capture(e []rasa.Event, er error) (added bool, err error) {
+	if err = er; err == nil && len(e) > 0 {
+		*c = append(*c)
+		added = true
+	}
 	return
 }
 
@@ -106,21 +117,6 @@ func (a *Action) activateIfRequired(
 func (a *Action) validateIfRequired(ctx *Context, disp *action.CollectingDispatcher) (events []rasa.Event, err error) {
 	// UNIMPLEMENTED
 	return nil, nil
-}
-
-//
-func (a *Action) requestNextSlot(
-	ctx *Context,
-	disp *action.CollectingDispatcher,
-) (events []rasa.Event, err error) {
-	// if implemented by the handler, defer call
-	if nsr, ok := a.Handler.(SlotRequester); ok {
-		events, err = nsr.RequestNextSlot(ctx, disp)
-		return
-	}
-
-	// manual call
-	return
 }
 
 //
