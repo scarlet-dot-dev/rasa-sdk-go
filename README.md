@@ -17,12 +17,7 @@ This package implements the SDK based on the specifications for `Rasa 1.9.*`.
 * Exposes an API is similar to the python SDK.
 * Configurable logging and server settings.
 * Code generation CLI for boilerplate and constants, based on Rasa's
-  `domain.yaml`.
-
-*Non-features:*
-
-* To reduce the complexity of the API, `**kwargs` from the Python SDK are not
-supported in this package. This specifically impacts `Message` values sent through the `CollectingDispatcher`.
+  `domain.yaml`.  
 
 ## Import
 
@@ -41,4 +36,4 @@ Unless otherwise specified, code present in this library is licensed under the
 
 ## Authors
 
-* Eddy (scarlet.dev)
+* Eddy (@scarlet.dev)

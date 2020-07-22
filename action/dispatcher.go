@@ -4,17 +4,6 @@
 
 package action
 
-// Message TODO
-type Message struct {
-	Text        string    `json:"text,omitempty"`
-	Image       string    `json:"image,omitempty"`
-	JSONMessage JSONMap   `json:"json_message,omitempty"`
-	Template    string    `json:"template,omitempty"`
-	Attachment  string    `json:"attachment,omitempty"`
-	Buttons     []JSONMap `json:"buttons,omitempty"`
-	Elements    []JSONMap `json:"elements,omitempty"`
-}
-
 // JSONMap TODO
 type JSONMap map[string]interface{}
 
