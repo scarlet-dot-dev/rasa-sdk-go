@@ -29,7 +29,7 @@ func TestEventMarshalJSON(t *testing.T) {
 // TestEventList
 func TestEventList(t *testing.T) {
 	t.Run("JSON", func(t *testing.T) {
-		cases := []EventList{
+		cases := []Events{
 			{},
 			{&SlotSet{}},
 		}
@@ -40,7 +40,7 @@ func TestEventList(t *testing.T) {
 			ser, err := json.Marshal(entry)
 			require.NoError(t, err)
 
-			var result EventList
+			var result Events
 			err = json.Unmarshal(ser, &result)
 			require.NoError(t, err)
 			require.Equal(t, len(entry), len(result))

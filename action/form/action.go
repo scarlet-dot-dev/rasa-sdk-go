@@ -33,11 +33,11 @@ func (a *Action) ActionName() string {
 func (a *Action) Run(
 	actx *action.Context,
 	disp *action.CollectingDispatcher,
-) (events []rasa.Event, err error) {
+) (events rasa.Events, err error) {
 	ec := (*eventCapture)(&events)
 
 	// form context for Handler methods
-	fctx := Context{actx}
+	fctx := Context{actx, a.Handler}
 
 	// first ensure the form is activated
 	if _, err = ec.capture(a.activateIfRequired(&fctx, disp)); err != nil {
@@ -50,12 +50,12 @@ func (a *Action) Run(
 	}
 
 	// if validation caused the form to be deactivated, abort
-	if containsFormDeactivate(*ec) {
+	if ec.containsFormDeactivate() {
 		return
 	}
 
 	// perform remaining actions with updated tracker
-	a.applySlotSets(fctx.Tracker, events)
+	ec.applySlotSets(fctx.Tracker)
 
 	// get the next slot request events
 	var added bool
@@ -76,15 +76,36 @@ func (a *Action) Run(
 }
 
 //
-type eventCapture []rasa.Event
+type eventCapture rasa.Events
 
 //
-func (c *eventCapture) capture(e []rasa.Event, er error) (added bool, err error) {
+func (c *eventCapture) capture(e rasa.Events, er error) (added bool, err error) {
 	if err = er; err == nil && len(e) > 0 {
 		*c = append(*c)
 		added = true
 	}
 	return
+}
+
+// containsFormDeactivate
+func (c *eventCapture) containsFormDeactivate() bool {
+	for _, event := range *c {
+		if e, ok := event.(*rasa.Form); ok {
+			if e.Name == "" {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// applySlotSets
+func (c *eventCapture) applySlotSets(t *rasa.Tracker) {
+	for i := range *c {
+		if event, ok := (*c)[i].(*rasa.SlotSet); ok {
+			t.Slots[event.Key] = event.Value
+		}
+	}
 }
 
 // String implements fmt.Stringer.
@@ -107,35 +128,14 @@ func (a *Action) String() string {
 func (a *Action) activateIfRequired(
 	ctx *Context,
 	dispatcher *action.CollectingDispatcher,
-) (events []rasa.Event, err error) {
+) (events rasa.Events, err error) {
 	// logger := action.
 	// UNIMPLEMENTED
 	return
 }
 
 // validateIfRequired will perform validation on all existing slots that are required by the form.
-func (a *Action) validateIfRequired(ctx *Context, disp *action.CollectingDispatcher) (events []rasa.Event, err error) {
+func (a *Action) validateIfRequired(ctx *Context, disp *action.CollectingDispatcher) (events rasa.Events, err error) {
 	// UNIMPLEMENTED
 	return nil, nil
-}
-
-//
-func (a *Action) applySlotSets(t *rasa.Tracker, events []rasa.Event) {
-	for i := range events {
-		if event, ok := events[i].(*rasa.SlotSet); ok {
-			t.Slots[event.Key] = event.Value
-		}
-	}
-}
-
-//
-func containsFormDeactivate(events []rasa.Event) bool {
-	for _, event := range events {
-		if e, ok := event.(*rasa.Form); ok {
-			if e.Name == "" {
-				return true
-			}
-		}
-	}
-	return false
 }

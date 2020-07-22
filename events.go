@@ -47,20 +47,20 @@ type Event interface {
 	Type() EventType
 }
 
-// EventList implements JSON Unmarshaling of Rasa's Event types.
-type EventList []Event
+// Events implements JSON Unmarshaling of Rasa's Event types.
+type Events []Event
 
 // ensure interface
-var _ json.Unmarshaler = (*EventList)(nil)
+var _ json.Unmarshaler = (*Events)(nil)
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (l *EventList) UnmarshalJSON(data []byte) (err error) {
+func (l *Events) UnmarshalJSON(data []byte) (err error) {
 	defer handle.Error(&err, func(err error) error {
 		return errors.WithMessage(err, "unable to unmarshal EventList")
 	})
 
 	// initialize as empty eventlist
-	*l = EventList{}
+	*l = Events{}
 
 	// get the Raw event messages
 	var events []json.RawMessage

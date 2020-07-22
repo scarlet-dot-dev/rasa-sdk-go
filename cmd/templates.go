@@ -80,7 +80,7 @@ func (h *{{ .Action | ToHandlerTypeName}}) Run(
 	dispatcher *action.CollectingDispatcher,
 	tracker *rasa.Tracker,
 	domain *rasa.Domain,
-) (events []rasa.Event, err error) {
+) (events rasa.Events, err error) {
 	// TODO implement the Action Handler
 	return
 }

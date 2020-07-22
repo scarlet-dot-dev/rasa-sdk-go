@@ -17,22 +17,6 @@ import (
 	"go.scarlet.dev/rasa/handle"
 )
 
-// Handler specifies the interface implemented by action handlers.
-type Handler interface {
-	// ActionName returns the name of the action for which the instance
-	// implements handling.
-	ActionName() string
-
-	// Run should process the action.
-	//
-	// The Context passed to Run is the context of the HTTP request sent by
-	// Rasa's engine.
-	Run(
-		ctx *Context,
-		dispatcher *CollectingDispatcher,
-	) (events []rasa.Event, err error)
-}
-
 // Request is the request body for the webhook request.
 type Request struct {
 	NextAction string        `json:"next_action"`
@@ -45,8 +29,8 @@ type Request struct {
 // Response is the response body for the action server in case of
 // successful handling of the request.
 type Response struct {
-	Events    rasa.EventList `json:"events"`
-	Responses []Message      `json:"responses"`
+	Events    rasa.Events `json:"events"`
+	Responses []Message   `json:"responses"`
 }
 
 // Server implements http.Handler for the Action Server endpoint.
@@ -152,7 +136,7 @@ func (s *Server) handleWebhook(ctx context.Context, r *http.Request) (response i
 		return
 	}
 	if events == nil {
-		events = rasa.EventList{} // non-nil
+		events = rasa.Events{} // non-nil
 	}
 
 	// respond

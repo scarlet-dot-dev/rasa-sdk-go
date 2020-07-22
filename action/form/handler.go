@@ -12,46 +12,6 @@ const (
 	RequestedSlot = "requested_slot"
 )
 
-// DefaultEmbed provides default implementations for optional methods of the
-// Handler interface.
-type DefaultEmbed struct{}
-
-// RequestNextSlot implements Handler.
-func (DefaultEmbed) RequestNextSlot(ctx *Context, dispatcher *action.CollectingDispatcher) ([]rasa.Event, error) {
-	panic("UNIMPLEMENTED")
-}
-
-// SlotMappers should return a map of (slot, mapper) values to map required
-// slots.
-//
-// Returning a nil or empty map is converted to a mapping of the slot to the
-// extracted entity with the same name.
-func (DefaultEmbed) SlotMappers() Mappers {
-	return nil
-}
-
-// Validator returns a custom validator for the slot. If no custom
-// validation is needed, this method should return nil.
-func (DefaultEmbed) Validator(slot string) Validator {
-	return nil
-}
-
-// Deactivate TODO
-func (DefaultEmbed) Deactivate() (events []rasa.Event, err error) {
-	events = []rasa.Event{
-		rasa.Form{
-			Timestamp: rasa.Time(time.Now()),
-			Name:      "",
-		},
-		rasa.SlotSet{
-			Timestamp: rasa.Time(time.Now()),
-			Key:       RequestedSlot,
-			Value:     nil,
-		},
-	}
-	return
-}
-
 // Handler TODO
 type Handler interface {
 	// Name is the unique identifier of the form. This name is the action that
@@ -71,13 +31,13 @@ type Handler interface {
 	Submit(
 		ctx *Context,
 		dispatcher *action.CollectingDispatcher,
-	) (events []rasa.Event, err error)
+	) (events rasa.Events, err error)
 
 	// RequestNextSlot TODO
 	//
 	// A default implementation of RequestNextSlot can be provided by embedding
 	// `HandlerDefaults`.
-	RequestNextSlot(ctx *Context, dispatcher *action.CollectingDispatcher) ([]rasa.Event, error)
+	RequestNextSlot(ctx *Context, dispatcher *action.CollectingDispatcher) (rasa.Events, error)
 
 	// SlotMappers should return a map of (slot, mapper) values to map required
 	// slots.
@@ -100,7 +60,7 @@ type Handler interface {
 	//
 	// A default implementation of Deactivate can be provided by embedding
 	// `HandlerDefaults`.
-	Deactivate() (events []rasa.Event, err error)
+	Deactivate() (events rasa.Events, err error)
 }
 
 // SlotRequester is an OPTIONAL interface for Handler. When implemented, it will
@@ -108,5 +68,50 @@ type Handler interface {
 // RequestNextSlot.
 type SlotRequester interface {
 	// RequestNextSlot TODO
-	RequestNextSlot(ctx *Context, dispatcher *action.CollectingDispatcher) ([]rasa.Event, error)
+	RequestNextSlot(ctx *Context, dispatcher *action.CollectingDispatcher) (rasa.Events, error)
+}
+
+// DefaultEmbed provides default implementations for optional methods of the
+// Handler interface.
+type DefaultEmbed struct{}
+
+// RequestNextSlot implements Handler.
+//
+//
+func (DefaultEmbed) RequestNextSlot(
+	ctx *Context,
+	dispatcher *action.CollectingDispatcher,
+) (rasa.Events, error) {
+	return ctx.requestNextSlot(dispatcher)
+}
+
+// SlotMappers should return a map of (slot, mapper) values to map required
+// slots.
+//
+// Returning a nil or empty map is converted to a mapping of the slot to the
+// extracted entity with the same name.
+func (DefaultEmbed) SlotMappers() Mappers {
+	return nil
+}
+
+// Validator returns a custom validator for the slot. If no custom
+// validation is needed, this method should return nil.
+func (DefaultEmbed) Validator(slot string) Validator {
+	return nil
+}
+
+// Deactivate TODO
+func (DefaultEmbed) Deactivate() (events rasa.Events, err error) {
+	events = rasa.Events{
+		rasa.Form{
+			Timestamp: rasa.Time(time.Now()),
+			Name:      "",
+		},
+		rasa.SlotSet{
+			Timestamp: rasa.Time(time.Now()),
+			Key:       RequestedSlot,
+			Value:     nil,
+		},
+	}
+	return
 }

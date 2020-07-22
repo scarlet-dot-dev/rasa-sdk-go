@@ -14,7 +14,7 @@ type Tracker struct {
 	LatestActionName   string       `json:"latest_action_name,omitempty"`
 	LatestEventTime    Time         `json:"latest_event_time,omitempty"`
 	LatestInputChannel string       `json:"latest_input_channel,omitempty"`
-	Events             EventList    `json:"events"`
+	Events             Events       `json:"events"`
 	Paused             bool         `json:"paused"`
 	FollowupAction     string       `json:"followup_action,omitempty"`
 	ActiveForm         *ActiveForm  `json:"active_form,omitempty"`

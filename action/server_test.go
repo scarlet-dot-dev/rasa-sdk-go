@@ -28,7 +28,7 @@ func (testHandlerNoEvent) ActionName() string    { return "action_no_event" }
 func (testHandlerNoDispatch) ActionName() string { return "action_no_dispatch" }
 func (testHandlerErr) ActionName() string        { return "action_error" }
 
-func (testHandler1) Run(ctx *Context, dispatcher *CollectingDispatcher) (events []rasa.Event, err error) {
+func (testHandler1) Run(ctx *Context, dispatcher *CollectingDispatcher) (events rasa.Events, err error) {
 	dispatcher.Utter(&Message{
 		Text: "test string",
 	})
@@ -39,14 +39,14 @@ func (testHandler1) Run(ctx *Context, dispatcher *CollectingDispatcher) (events 
 	return
 }
 
-func (testHandlerNoEvent) Run(ctx *Context, dispatcher *CollectingDispatcher) (events []rasa.Event, err error) {
+func (testHandlerNoEvent) Run(ctx *Context, dispatcher *CollectingDispatcher) (events rasa.Events, err error) {
 	dispatcher.Utter(&Message{
 		Text: "test string",
 	})
 	return
 }
 
-func (testHandlerNoDispatch) Run(ctx *Context, dispatcher *CollectingDispatcher) (events []rasa.Event, err error) {
+func (testHandlerNoDispatch) Run(ctx *Context, dispatcher *CollectingDispatcher) (events rasa.Events, err error) {
 	events = append(events, &rasa.SlotSet{
 		Key:   "test",
 		Value: "420",
@@ -54,7 +54,7 @@ func (testHandlerNoDispatch) Run(ctx *Context, dispatcher *CollectingDispatcher)
 	return
 }
 
-func (testHandlerErr) Run(ctx *Context, dispatcher *CollectingDispatcher) (events []rasa.Event, err error) {
+func (testHandlerErr) Run(ctx *Context, dispatcher *CollectingDispatcher) (events rasa.Events, err error) {
 	err = errors.New("test error")
 	return
 }
@@ -147,7 +147,7 @@ func TestServer(t *testing.T) {
 				Responses: []Message{{
 					Text: "test string",
 				}},
-				Events: rasa.EventList{
+				Events: rasa.Events{
 					&rasa.SlotSet{
 						Key:   "test",
 						Value: "420",
@@ -182,7 +182,7 @@ func TestServer(t *testing.T) {
 				Responses: []Message{{
 					Text: "test string",
 				}},
-				Events: rasa.EventList{}, // Rasa expects an empty, non-nil list of events.
+				Events: rasa.Events{}, // Rasa expects an empty, non-nil list of events.
 			}
 
 			body := &Request{
@@ -210,7 +210,7 @@ func TestServer(t *testing.T) {
 		t.Run("action_no_dispatch", func(t *testing.T) {
 			expect := Response{
 				Responses: []Message{}, // Rasa expects non-nil values
-				Events: rasa.EventList{
+				Events: rasa.Events{
 					&rasa.SlotSet{
 						Key:   "test",
 						Value: "420",
