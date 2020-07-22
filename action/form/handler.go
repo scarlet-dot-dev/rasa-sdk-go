@@ -63,14 +63,6 @@ type Handler interface {
 	Deactivate() (events rasa.Events, err error)
 }
 
-// SlotRequester is an OPTIONAL interface for Handler. When implemented, it will
-// be called instead of the standard implementation of FormHandler's
-// RequestNextSlot.
-type SlotRequester interface {
-	// RequestNextSlot TODO
-	RequestNextSlot(ctx *Context, dispatcher *action.CollectingDispatcher) (rasa.Events, error)
-}
-
 // DefaultEmbed provides default implementations for optional methods of the
 // Handler interface.
 type DefaultEmbed struct{}
