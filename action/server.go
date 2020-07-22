@@ -28,10 +28,8 @@ type Handler interface {
 	// The Context passed to Run is the context of the HTTP request sent by
 	// Rasa's engine.
 	Run(
-		ctx context.Context,
+		ctx *Context,
 		dispatcher *CollectingDispatcher,
-		tracker *rasa.Tracker,
-		domain *rasa.Domain,
 	) (events []rasa.Event, err error)
 }
 
@@ -129,7 +127,7 @@ func (s *Server) handleWebhook(ctx context.Context, r *http.Request) (response i
 	}
 
 	// log action
-	LogDebugf(ctx, "[sender: %s - action: %s]", req.SenderID, req.NextAction)
+	s.debugf("[sender: %s - action: %s]", req.SenderID, req.NextAction)
 
 	action := req.NextAction
 	handler, exists := s.Handlers[action]
@@ -140,7 +138,15 @@ func (s *Server) handleWebhook(ctx context.Context, r *http.Request) (response i
 
 	// handle action
 	disp := CollectingDispatcher{} // non-nil
-	events, err := handler.Run(ctx, &disp, req.Tracker, req.Domain)
+	events, err := handler.Run(
+		&Context{
+			context: ctx,
+			logger:  s.Logger,
+			Tracker: req.Tracker,
+			Domain:  req.Domain,
+		},
+		&disp,
+	)
 	if err != nil {
 		err = &HandlerError{action, err}
 		return
@@ -228,14 +234,14 @@ func (s *Server) withLogs(
 	defer cancel()
 
 	// log
-	LogInfof(ctx, "%s - %s START", r.Method, r.URL.String())
-	defer LogInfof(ctx, "%s - %s END", r.Method, r.URL.String())
+	s.infof("%s - %s START", r.Method, r.URL.String())
+	defer s.infof("%s - %s END", r.Method, r.URL.String())
 
 	// ensure error handling
 	var err error
 	defer s.serveError(w, &err)
 	defer handle.Error(&err, func(err error) error {
-		LogErrorf(ctx, "%s - %s : %s", r.Method, r.URL.String(), err.Error())
+		s.errorf("%s - %s : %s", r.Method, r.URL.String(), err.Error())
 		return err
 	})
 
@@ -250,6 +256,26 @@ func (s *Server) withLogs(
 //
 func (s *Server) requestContext(ctx context.Context, r *http.Request) (context.Context, context.CancelFunc) {
 	// TODO(ed): enhance rasactx.Request using r
-	ctx = WithContext(ctx, &Context{Logger: s.Logger})
 	return context.WithTimeout(ctx, time.Second*10) // TODO(ed): extract timeout constant
+}
+
+// debugf
+func (s *Server) debugf(format string, args ...interface{}) {
+	if s.Logger != nil {
+		s.Logger.Debugf(format, args...)
+	}
+}
+
+// infof
+func (s *Server) infof(format string, args ...interface{}) {
+	if s.Logger != nil {
+		s.Logger.Infof(format, args...)
+	}
+}
+
+// errorf
+func (s *Server) errorf(format string, args ...interface{}) {
+	if s.Logger != nil {
+		s.Logger.Errorf(format, args...)
+	}
 }

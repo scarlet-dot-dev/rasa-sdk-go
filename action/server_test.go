@@ -6,7 +6,6 @@ package action
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -29,7 +28,7 @@ func (testHandlerNoEvent) ActionName() string    { return "action_no_event" }
 func (testHandlerNoDispatch) ActionName() string { return "action_no_dispatch" }
 func (testHandlerErr) ActionName() string        { return "action_error" }
 
-func (testHandler1) Run(ctx context.Context, dispatcher *CollectingDispatcher, tracker *rasa.Tracker, domain *rasa.Domain) (events []rasa.Event, err error) {
+func (testHandler1) Run(ctx *Context, dispatcher *CollectingDispatcher) (events []rasa.Event, err error) {
 	dispatcher.Utter(&Message{
 		Text: "test string",
 	})
@@ -39,14 +38,15 @@ func (testHandler1) Run(ctx context.Context, dispatcher *CollectingDispatcher, t
 	})
 	return
 }
-func (testHandlerNoEvent) Run(ctx context.Context, dispatcher *CollectingDispatcher, tracker *rasa.Tracker, domain *rasa.Domain) (events []rasa.Event, err error) {
+
+func (testHandlerNoEvent) Run(ctx *Context, dispatcher *CollectingDispatcher) (events []rasa.Event, err error) {
 	dispatcher.Utter(&Message{
 		Text: "test string",
 	})
 	return
 }
 
-func (testHandlerNoDispatch) Run(ctx context.Context, dispatcher *CollectingDispatcher, tracker *rasa.Tracker, domain *rasa.Domain) (events []rasa.Event, err error) {
+func (testHandlerNoDispatch) Run(ctx *Context, dispatcher *CollectingDispatcher) (events []rasa.Event, err error) {
 	events = append(events, &rasa.SlotSet{
 		Key:   "test",
 		Value: "420",
@@ -54,7 +54,7 @@ func (testHandlerNoDispatch) Run(ctx context.Context, dispatcher *CollectingDisp
 	return
 }
 
-func (testHandlerErr) Run(ctx context.Context, dispatcher *CollectingDispatcher, tracker *rasa.Tracker, domain *rasa.Domain) (events []rasa.Event, err error) {
+func (testHandlerErr) Run(ctx *Context, dispatcher *CollectingDispatcher) (events []rasa.Event, err error) {
 	err = errors.New("test error")
 	return
 }

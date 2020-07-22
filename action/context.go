@@ -6,24 +6,58 @@ package action
 
 import (
 	"context"
+
+	"go.scarlet.dev/rasa"
 )
 
 // Context contains request specific context, such as a logger for the specific
 // request with tracing information.
 type Context struct {
-	Logger Logger
+
+	//
+	Tracker *rasa.Tracker
+
+	//
+	Domain *rasa.Domain
+
+	// internal fields
+	logger  Logger
+	context context.Context
 }
 
-// unique context key for Request values.
-type requestContextKey struct{}
+// ensure interfaces.
+var _ Logger = (*Context)(nil)
 
-// WithContext returns a new context with the additional Request information.
-func WithContext(ctx context.Context, r *Context) context.Context {
-	return context.WithValue(ctx, requestContextKey{}, r)
+// Context returns the Context of the action request that triggered the
+// execution of the action handler.
+func (c *Context) Context() context.Context {
+	return c.context
 }
 
-// ContextFrom returns the additional Request information from the Context.
-func ContextFrom(ctx context.Context) *Context {
-	r, _ := ctx.Value(requestContextKey{}).(*Context)
-	return r
+// Debugf impements Logger.
+func (c *Context) Debugf(format string, args ...interface{}) {
+	if c.logger != nil {
+		c.logger.Debugf(format, args...)
+	}
+}
+
+// Infof implements Logger.
+func (c *Context) Infof(format string, args ...interface{}) {
+	if c.logger != nil {
+		c.logger.Infof(format, args...)
+	}
+}
+
+// Warnf implements Logger.
+func (c *Context) Warnf(format string, args ...interface{}) {
+	if c.logger != nil {
+		c.logger.Warnf(format, args...)
+	}
+}
+
+// Errorf implements Logger.
+func (c *Context) Errorf(format string, args ...interface{}) {
+	if c.logger != nil {
+		c.logger.Errorf(format, args...)
+	}
 }

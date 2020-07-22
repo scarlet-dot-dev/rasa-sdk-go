@@ -28,6 +28,8 @@ const (
 	EventTypeConversationPaused      = EventType("pause")
 	EventTypeConversationResumed     = EventType("resume")
 	EventTypeFollowupAction          = EventType("followup")
+	EventTypeForm                    = EventType("form")
+	EventTypeFormValidation          = EventType("form_validation")
 	EventTypeReminderCancelled       = EventType("cancel_reminder")
 	EventTypeReminderScheduled       = EventType("reminder")
 	EventTypeRestarted               = EventType("restart")
@@ -215,6 +217,20 @@ type FollowupAction struct {
 	ActionName string `json:"name"`
 }
 
+// Form TODO
+type Form struct {
+	Timestamp Time   `json:"timestamp,omitempty"`
+	Name      string `json:"name,omitempty"`
+}
+
+// FormValidation TODO
+type FormValidation struct {
+	Timestamp Time `json:"timestamp,omitempty"`
+	Validate  bool `json:"validate,omitempty"`
+	// FIXME(ed): https://github.com/RasaHQ/rasa-sdk/blob/master/rasa_sdk/events.py#L178
+	// There is no type definition for Validate in the SDK.
+}
+
 // ReminderCancelled TODO
 type ReminderCancelled struct {
 	Timestamp  Time                     `json:"timestamp,omitempty"`
@@ -296,6 +312,12 @@ func (ConversationResumed) Type() EventType { return EventTypeConversationResume
 func (FollowupAction) Type() EventType { return EventTypeFollowupAction }
 
 // Type implements Event.
+func (Form) Type() EventType { return EventTypeForm }
+
+// Type implements Event.
+func (FormValidation) Type() EventType { return EventTypeFormValidation }
+
+// Type implements Event.
 func (ReminderCancelled) Type() EventType { return EventTypeReminderCancelled }
 
 // Type implements Event.
@@ -347,6 +369,12 @@ func (e *ConversationResumed) MarshalJSON() ([]byte, error) { return marshalEven
 func (e *FollowupAction) MarshalJSON() ([]byte, error) { return marshalEvent(e) }
 
 // MarshalJSON implements json.Marshaler.
+func (e *Form) MarshalJSON() ([]byte, error) { return marshalEvent(e) }
+
+// MarshalJSON implements json.Marshaler.
+func (e *FormValidation) MarshalJSON() ([]byte, error) { return marshalEvent(e) }
+
+// MarshalJSON implements json.Marshaler.
 func (e *ReminderCancelled) MarshalJSON() ([]byte, error) { return marshalEvent(e) }
 
 // MarshalJSON implements json.Marshaler.
@@ -380,6 +408,8 @@ var _ Event = (*BotUttered)(nil)
 var _ Event = (*ConversationPaused)(nil)
 var _ Event = (*ConversationResumed)(nil)
 var _ Event = (*FollowupAction)(nil)
+var _ Event = (*Form)(nil)
+var _ Event = (*FormValidation)(nil)
 var _ Event = (*ReminderCancelled)(nil)
 var _ Event = (*ReminderScheduled)(nil)
 var _ Event = (*Restarted)(nil)
@@ -399,6 +429,8 @@ var _ json.Marshaler = (*BotUttered)(nil)
 var _ json.Marshaler = (*ConversationPaused)(nil)
 var _ json.Marshaler = (*ConversationResumed)(nil)
 var _ json.Marshaler = (*FollowupAction)(nil)
+var _ json.Marshaler = (*Form)(nil)
+var _ json.Marshaler = (*FormValidation)(nil)
 var _ json.Marshaler = (*ReminderCancelled)(nil)
 var _ json.Marshaler = (*ReminderScheduled)(nil)
 var _ json.Marshaler = (*Restarted)(nil)
