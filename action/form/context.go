@@ -121,7 +121,7 @@ func (c *Context) evalMapper(m Mapper, slot string) interface{} {
 	switch m := m.(type) {
 	case FromEntity:
 		if c.intentIsDesired(m) && c.entityIsDesired(m, slot) {
-			return c.GetEntityValue(m.Entity, m.Role, m.Group)
+			return c.EntityValue(m.Entity, m.Role, m.Group)
 		}
 	case FromTriggerIntent:
 		if c.intentIsDesired(m) && c.Tracker.ActiveForm.Is(c.handler.FormName()) {
@@ -148,7 +148,7 @@ func (c *Context) entityIsDesired(mapping Mapper, otherSlot string) bool {
 	eqEntity := m.Entity == otherSlot
 	fulfilling := false
 	if m.Role != "" || m.Group != "" {
-		vals := c.GetEntityValue(m.Entity, m.Role, m.Group)
+		vals := c.EntityValue(m.Entity, m.Role, m.Group)
 		fulfilling = vals != nil
 	}
 

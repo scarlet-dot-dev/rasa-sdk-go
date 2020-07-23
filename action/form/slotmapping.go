@@ -33,7 +33,7 @@ func (m FromEntity) Desires(intent string) bool {
 
 // Extract implements Mapper.
 func (m FromEntity) Extract(ctx *Context) interface{} {
-	return ctx.GetEntityValue(m.Entity, m.Role, m.Group)
+	return ctx.EntityValue(m.Entity, m.Role, m.Group)
 }
 
 // FromTriggerIntent TODO
