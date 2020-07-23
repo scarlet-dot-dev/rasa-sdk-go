@@ -76,44 +76,6 @@ func (a *Action) Run(
 	return
 }
 
-//
-type eventCapture rasa.Events
-
-// appemd
-func (c *eventCapture) append(e ...rasa.Event) {
-	*c = append(*c, e...)
-}
-
-//
-func (c *eventCapture) capture(e rasa.Events, ce error) (added bool, err error) {
-	if err = ce; err == nil && len(e) > 0 {
-		c.append(e...)
-		added = true
-	}
-	return
-}
-
-// containsFormDeactivate
-func (c *eventCapture) containsFormDeactivate() bool {
-	for _, event := range *c {
-		if e, ok := event.(*rasa.Form); ok {
-			if e.Name == "" {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// applySlotSets
-func (c *eventCapture) applySlotSets(t *rasa.Tracker) {
-	for i := range *c {
-		if event, ok := (*c)[i].(*rasa.SlotSet); ok {
-			t.Slots[event.Key] = event.Value
-		}
-	}
-}
-
 // String implements fmt.Stringer.
 //
 // String returns the name of the form.
@@ -171,45 +133,70 @@ func (a *Action) activateIfRequired(
 
 	// validate the prefilled slots
 	ctx.Debugf("validating pre-filled required slots: %s", prefilledSlots)
-	if _, err = ec.capture(a.ValidateSlots(ctx, disp, prefilledSlots)); err != nil {
+	if _, err = ec.capture(ctx.ValidateSlots(disp, prefilledSlots)); err != nil {
 		return
 	}
 
 	return
 }
 
-// validateIfRequired will perform validation on all existing slots that are required by the form.
+// validateIfRequired will perform validation on all existing slots that are
+// required by the form, if required.
+//
+//  Validation is required if:
+//	- the form is active
+//	- the form is called after `action_listen`
+//	- form validation was not cancelled
 func (a *Action) validateIfRequired(ctx *Context, disp *action.CollectingDispatcher) (events rasa.Events, err error) {
-	// UNIMPLEMENTED
-	return nil, nil
+	if !ctx.shouldValidate() {
+		ctx.Debugf("Skipping validation")
+		return
+	}
+
+	//
+	ctx.Debugf("validating user input [%s]", ctx.Tracker.LatestMessage)
+	events, err = a.Handler.Validate(ctx, disp)
+	return
 }
 
-// ValidateSlots TODO
-func (a *Action) ValidateSlots(
-	ctx *Context,
-	disp *action.CollectingDispatcher,
-	slots rasa.Slots,
-) (events rasa.Events, err error) {
-	sc := make(rasa.Slots)
+//
+//
+//
 
-	for slot, value := range slots {
-		validator := a.Handler.Validator(slot)
+//
+type eventCapture rasa.Events
 
-		var sset rasa.Slots
-		if sset, err = validator.Validate(ctx, disp, value); err != nil {
-			return
-		}
-		sc.Update(sset)
-	}
+// appemd
+func (c *eventCapture) append(e ...rasa.Event) {
+	*c = append(*c, e...)
+}
 
-	// turn validated slots into SlotSet events
-	timestamp := rasa.Time(time.Now())
-	for key := range sc {
-		events = append(events, rasa.SlotSet{
-			Timestamp: timestamp,
-			Key:       key,
-			Value:     sc[key],
-		})
+//
+func (c *eventCapture) capture(e rasa.Events, ce error) (added bool, err error) {
+	if err = ce; err == nil && len(e) > 0 {
+		c.append(e...)
+		added = true
 	}
 	return
+}
+
+// containsFormDeactivate
+func (c *eventCapture) containsFormDeactivate() bool {
+	for _, event := range *c {
+		if e, ok := event.(*rasa.Form); ok {
+			if e.Name == "" {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// applySlotSets
+func (c *eventCapture) applySlotSets(t *rasa.Tracker) {
+	for i := range *c {
+		if event, ok := (*c)[i].(*rasa.SlotSet); ok {
+			t.Slots[event.Key] = event.Value
+		}
+	}
 }

@@ -1,6 +1,7 @@
 package form
 
 import (
+	"fmt"
 	"time"
 
 	"go.scarlet.dev/rasa"
@@ -37,7 +38,21 @@ type Handler interface {
 	//
 	// A default implementation of RequestNextSlot can be provided by embedding
 	// `HandlerDefaults`.
-	RequestNextSlot(ctx *Context, dispatcher *action.CollectingDispatcher) (rasa.Events, error)
+	RequestNextSlot(
+		ctx *Context,
+		dispatcher *action.CollectingDispatcher,
+	) (rasa.Events, error)
+
+	// Validate extracts and validates the value of requested slot.
+	//
+	// If nothing was extracted, reject execution of the form action.
+	//
+	// A default implementation of Validate can be provided by embedding
+	// `HandlerDefaults`.
+	Validate(
+		ctx *Context,
+		disp *action.CollectingDispatcher,
+	) (events rasa.Events, err error)
 
 	// SlotMappers should return a map of (slot, mapper) values to map required
 	// slots.
@@ -47,7 +62,7 @@ type Handler interface {
 	//
 	// A default implementation of SlotMappers can be provided by embedding
 	// `HandlerDefaults`.
-	SlotMappers() Mappers
+	SlotMappers() map[string]Mappers
 
 	// Validator returns a custom validator for the slot. If no custom
 	// validation is needed, the method can return DefaultValidator(slot).
@@ -77,13 +92,34 @@ func (DefaultEmbed) RequestNextSlot(
 	return ctx.requestNextSlot(dispatcher)
 }
 
+// Validate implements Handler.
+func (DefaultEmbed) Validate(ctx *Context, disp *action.CollectingDispatcher) (events rasa.Events, err error) {
+	slotValues := ctx.extractOtherSlots()
+	slotToFill, _ := ctx.Tracker.Slots[RequestedSlot].(string)
+
+	// if there is a slot to fill, verify if it is provided
+	if slotToFill != "" {
+		slotValues.Update(ctx.extractRequestedSlot())
+		if len(slotValues) == 0 {
+			err = &action.ExecutionRejection{
+				Action: ctx.handler.FormName(),
+				Reason: fmt.Sprintf("failed to extract slot [%s]", slotToFill),
+			}
+			return
+		}
+	}
+
+	events, err = ctx.ValidateSlots(disp, slotValues)
+	return
+}
+
 // SlotMappers should return a map of (slot, mapper) values to map required
 // slots.
 //
-// Returning a nil or empty map is converted to a mapping of the slot to the
-// extracted entity with the same name.
-func (DefaultEmbed) SlotMappers() Mappers {
-	return nil
+// If a slot does not have any configured Mappers, it will be treated as a
+// default FromEntity mapper.
+func (DefaultEmbed) SlotMappers() map[string]Mappers {
+	return make(map[string]Mappers)
 }
 
 // Validator returns a custom validator for the slot. If no custom

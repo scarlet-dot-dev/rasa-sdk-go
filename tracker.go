@@ -29,16 +29,25 @@ func (t *Tracker) HasSlots() bool {
 
 // LatestEntityValues returns the entity values found for the passed entity name
 // in the latest message.
-func (t *Tracker) LatestEntityValues(entity string) (out []string) {
+func (t *Tracker) LatestEntityValues(entity, role, group string) (values []string) {
 	if len(t.LatestMessage.Entities) == 0 {
-		return
+		return nil
 	}
 
-	for _, entry := range t.LatestMessage.Entities {
-		entry := entry
-		if entry.Entity == entity && entry.Value != "" {
-			out = append(out, entry.Value)
+	entities := t.LatestMessage.Entities
+	for i := range entities {
+		val := entities[i]
+		if val.Entity != entity || val.Value == "" {
+			continue
 		}
+		if role != "" && role != val.Role {
+			continue
+		}
+		if group != "" && group != val.Group {
+			continue
+		}
+
+		values = append(values, val.Value)
 	}
 	return
 }
@@ -51,9 +60,17 @@ func (t *Tracker) HasActiveForm() bool {
 // ActiveForm holds a ActiveForm description in the Tracker.
 type ActiveForm struct {
 	Name           string       `json:"name"`
-	Validate       bool         `json:"validate,omitempty"`
+	Validate       *bool        `json:"validate,omitempty"`
 	Rejected       bool         `json:"rejected,omitempty"`
 	TriggerMessage *ParseResult `json:"trigger_message"`
+}
+
+//
+func (f *ActiveForm) ShouldValidate() bool {
+	if f.Validate == nil {
+		return true
+	}
+	return *f.Validate
 }
 
 // IsActive returns whether f represents an active Form.
@@ -64,11 +81,6 @@ func (f *ActiveForm) IsActive() bool {
 // Is returns whether f represents a Form with the provided name.
 func (f *ActiveForm) Is(name string) bool {
 	return f != nil && f.Name == name
-}
-
-// ShouldValidate TODO
-func (f *ActiveForm) ShouldValidate(defaults bool) bool {
-	return f.Validate || defaults
 }
 
 // ParseResult holds a processed (parsed) message description.
@@ -92,6 +104,8 @@ type Entity struct {
 	Value      string  `json:"value"`
 	Entity     string  `json:"entity"`
 	Confidence float64 `json:"confidence"`
+	Group      string  `json:"group,omitempty"`
+	Role       string  `json:"role,omitempty"`
 }
 
 // Slots is a wrapper type around slots.
@@ -115,4 +129,54 @@ func (m Slots) Update(s Slots) {
 // String returns a simple json-like representation of the map's values.
 func (m Slots) String() string {
 	return fmt.Sprintf("%#v", m)
+}
+
+// EntityValues TODO
+type EntityValue interface {
+	AsString() string
+	AsSlice() []string
+	Count() int
+}
+
+// ensure interfaces
+var _ EntityValue = (StringValue)("")
+var _ EntityValue = (SliceValue)(nil)
+
+// EntityValue TODO
+type StringValue string
+
+// AsString implements EntityValue
+func (v StringValue) AsString() string {
+	return string(v)
+}
+
+// AsSlice implements EntityValue.
+func (v StringValue) AsSlice() []string {
+	return []string{string(v)}
+}
+
+// Count implements EntityValue.
+func (v StringValue) Count() int {
+	return 1
+}
+
+// SliceValue TODO
+type SliceValue []string
+
+// AsString implements EntityValue
+func (v SliceValue) AsString() string {
+	if len(v) > 0 {
+		return v[0]
+	}
+	return ""
+}
+
+// AsSlice implements EntityValue.
+func (v SliceValue) AsSlice() []string {
+	return v
+}
+
+// Count implements EntityValue.
+func (v SliceValue) Count() int {
+	return len(v)
 }

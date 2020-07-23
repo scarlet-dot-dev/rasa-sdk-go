@@ -4,11 +4,21 @@ import "encoding/json"
 
 // IntentList is a slice type of strings, where each strings refers to a named
 // intent.
-type IntentList []string
+type Intents []string
 
 // IntentList implements IntentLister.
-func (l IntentList) IntentList() IntentList {
+func (l Intents) IntentList() Intents {
 	return l
+}
+
+// Contains TODO
+func (l Intents) Contains(intent string) bool {
+	for i := range l {
+		if l[i] == intent {
+			return true
+		}
+	}
+	return false
 }
 
 // Intent is a string type wrapper that implements IntentLister to allow a
@@ -16,8 +26,8 @@ func (l IntentList) IntentList() IntentList {
 type Intent string
 
 // IntentList implements IntentLister.
-func (l Intent) IntentList() IntentList {
-	return IntentList{string(l)}
+func (l Intent) IntentList() Intents {
+	return Intents{string(l)}
 }
 
 // MarshalJSON implements json.Marshaler.
@@ -28,8 +38,34 @@ func (l Intent) MarshalJSON() ([]byte, error) {
 // IntentLister is an interface to provide a union over Intent and IntentList,
 // to allow treating both as an IntentList.
 type IntentLister interface {
-	IntentList() IntentList
+	IntentList() Intents
 }
 
 // ensure interface
 var _ json.Marshaler = (*Intent)(nil)
+
+// IntentMatcher TODO
+type IntentFilter interface {
+	// Desires TODO
+	Desires(intent string) bool
+}
+
+// AllowIntents
+type AllowIntents struct {
+	IntentLister
+}
+
+//
+func (a AllowIntents) Desires(intent string) bool {
+	return a.IntentList().Contains(intent)
+}
+
+// BlockIntents
+type BlockIntents struct {
+	IntentLister
+}
+
+//
+func (b BlockIntents) Desires(intent string) bool {
+	return !b.IntentList().Contains(intent)
+}

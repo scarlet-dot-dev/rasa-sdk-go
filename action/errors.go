@@ -131,3 +131,19 @@ func (e *UnmarshalError) respCode() int {
 func (e *UnmarshalError) respBody() string {
 	return fmt.Sprintf("invalid JSON received: %s", e.cause.Error())
 }
+
+// ExecutionRejection implements error for errors that should stop Rasa from
+// executing an action.
+type ExecutionRejection struct {
+	Action string
+	Reason string
+}
+
+// Error implements builtin.error.
+func (e *ExecutionRejection) Error() string {
+	return fmt.Sprintf(
+		"rejected execution of [%s] for reason [%s]",
+		e.Action,
+		e.Reason,
+	)
+}
