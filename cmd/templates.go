@@ -76,10 +76,8 @@ func ({{ .Action | ToHandlerTypeName }}) ActionName() string {
 
 // Run implements action.Handler.
 func (h *{{ .Action | ToHandlerTypeName}}) Run(
-	ctx context.Context,
+	ctx *actions.Context,
 	dispatcher *action.CollectingDispatcher,
-	tracker *rasa.Tracker,
-	domain *rasa.Domain,
 ) (events rasa.Events, err error) {
 	// TODO implement the Action Handler
 	return
