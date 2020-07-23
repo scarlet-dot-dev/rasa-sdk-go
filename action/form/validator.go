@@ -40,7 +40,7 @@ func (fn ValidatorFunc) Validate(ctx *Context, dispatcher *action.CollectingDisp
 // custom validation is not required.
 type DefaultValidator string
 
-//
+// Validate implements Validator.
 func (v DefaultValidator) Validate(
 	ctx *Context,
 	dispatcher *action.CollectingDispatcher,

@@ -2,7 +2,7 @@ package form
 
 import "encoding/json"
 
-// IntentList is a slice type of strings, where each strings refers to a named
+// Intents is a slice type of strings, where each strings refers to a named
 // intent.
 type Intents []string
 
@@ -44,28 +44,28 @@ type IntentLister interface {
 // ensure interface
 var _ json.Marshaler = (*Intent)(nil)
 
-// IntentMatcher TODO
+// IntentFilter TODO
 type IntentFilter interface {
 	// Desires TODO
 	Desires(intent string) bool
 }
 
-// AllowIntents
+// AllowIntents implements an IntentFilter based on an allowlist.
 type AllowIntents struct {
 	IntentLister
 }
 
-//
+// Desires implements IntentFilter.
 func (a AllowIntents) Desires(intent string) bool {
 	return a.IntentList().Contains(intent)
 }
 
-// BlockIntents
+// BlockIntents implements an IntentFilter based on a blocklist.
 type BlockIntents struct {
 	IntentLister
 }
 
-//
+// Desires implements IntentFilter.
 func (b BlockIntents) Desires(intent string) bool {
 	return !b.IntentList().Contains(intent)
 }

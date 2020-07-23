@@ -59,8 +59,8 @@ func (a *Action) Run(
 	ec.applySlotSets(fctx.Tracker)
 
 	// get the next slot request events
-	var added bool
-	if added, err = ec.capture(a.Handler.RequestNextSlot(&fctx, disp)); err != nil || !added {
+	var added int
+	if added, err = ec.capture(a.Handler.RequestNextSlot(&fctx, disp)); err != nil || added == 0 {
 		return
 	}
 
@@ -172,10 +172,10 @@ func (c *eventCapture) append(e ...rasa.Event) {
 }
 
 //
-func (c *eventCapture) capture(e rasa.Events, ce error) (added bool, err error) {
-	if err = ce; err == nil && len(e) > 0 {
+func (c *eventCapture) capture(e rasa.Events, ce error) (added int, err error) {
+	added, err = len(e), ce
+	if err == nil && len(e) > 0 {
 		c.append(e...)
-		added = true
 	}
 	return
 }
