@@ -99,7 +99,7 @@ func (DefaultEmbed) Validate(ctx *Context, disp *action.CollectingDispatcher) (e
 
 	// if there is a slot to fill, verify if it is provided
 	if slotToFill != "" {
-		slotValues.Update(ctx.extractRequestedSlot())
+		slotValues.Update(ctx.extractRequestedSlot(slotToFill))
 		if len(slotValues) == 0 {
 			err = &action.ExecutionRejection{
 				Action: ctx.handler.FormName(),

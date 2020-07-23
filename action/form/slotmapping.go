@@ -49,7 +49,8 @@ func (m FromTriggerIntent) Desires(intent string) bool {
 
 // Extract implements Mapper.
 func (m FromTriggerIntent) Extract(ctx *Context) interface{} {
-	// TODO(ed): no-op? -> https://github.com/RasaHQ/rasa-sdk/blob/e92b8c8292ee0ed1d2e72247d78be56288b5daaa/rasa_sdk/forms.py#L341
+	// return nothing - Extract is used for requested slots, trigger_intent is
+	// used on form activation only.
 	return nil
 }
 

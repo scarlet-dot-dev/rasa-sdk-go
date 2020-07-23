@@ -84,25 +84,24 @@ func (c *Context) GetLatestEntityValues(
 }
 
 //
-func (c *Context) extractRequestedSlot() (values rasa.Slots) {
-	slotToFill, _ := c.Tracker.Slots[RequestedSlot].(string)
-	c.Debugf("trying to extract requested slot [%s]", slotToFill)
+func (c *Context) extractRequestedSlot(rslot string) (values rasa.Slots) {
+	c.Debugf("trying to extract requested slot [%s]", rslot)
 
 	// get mappers
-	mappers := c.mappersForSlot(slotToFill)
+	mappers := c.mappersForSlot(rslot)
 	for _, mapper := range mappers {
 		c.Debugf("got mapping %v", mapper)
 
-		if c.IntentIsDesired(mapper) {
+		if c.intentIsDesired(mapper) {
 			if value := mapper.Extract(c); value != nil {
-				values = rasa.Slots{slotToFill: value}
+				values = rasa.Slots{rslot: value}
 				return
 			}
 		}
 	}
 
 	// test the mappers for a match
-	c.Debugf("failed to extract requested slot [%s]", slotToFill)
+	c.Debugf("failed to extract requested slot [%s]", rslot)
 	return
 }
 
@@ -118,24 +117,63 @@ func (c *Context) extractOtherSlots() (values rasa.Slots) {
 		}
 
 		mappings := c.mappersForSlot(slot)
-		for _, mapping := range mappings {
-			_ = mapping
-			panic("unimplemented")
+		value := c.evalMappers(mappings, slot)
+		if value != nil {
+			c.Debugf("extracted extra slot [%s: %s]", slot, value)
+			values[slot] = value
 		}
 	}
 	return
 }
 
-// IntentIsDesired checks whether user intent matches intent conditions.
-func (c *Context) IntentIsDesired(mapping Mapper) bool {
+// evalMappers
+func (c *Context) evalMappers(mappings Mappers, slot string) (value interface{}) {
+	for _, mapping := range mappings {
+		// return the first non-nil value we encounter
+		if value = c.evalMapper(mapping, slot); value != nil {
+			return
+		}
+	}
+	return
+}
+
+// evalMapper
+func (c *Context) evalMapper(m Mapper, slot string) interface{} {
+	switch m := m.(type) {
+	case FromEntity:
+		if c.intentIsDesired(m) && c.entityIsDesired(m, slot) {
+			return c.GetEntityValue(m.Entity, m.Role, m.Group)
+		}
+	case FromTriggerIntent:
+		if c.intentIsDesired(m) && c.Tracker.ActiveForm.Is(c.handler.FormName()) {
+			return m.Value
+		}
+	}
+	return nil
+}
+
+// intentIsDesired checks whether user intent matches intent conditions.
+func (c *Context) intentIsDesired(mapping Mapper) bool {
 	intent := c.Tracker.LatestMessage.Intent.Name
 	return mapping.Desires(intent)
 }
 
-// EntityIsDesired checks whether otherSlot should be filled by an entity in the
+// entityIsDesired checks whether otherSlot should be filled by an entity in the
 // input or not.
-func (c *Context) EntityIsDesired(mapping Mapper, otherSlot string) bool {
-	panic("UNIMPLEMENTED")
+func (c *Context) entityIsDesired(mapping Mapper, otherSlot string) bool {
+	m, ok := mapping.(FromEntity)
+	if !ok {
+		return false
+	}
+
+	eqEntity := m.Entity == otherSlot
+	fulfilling := false
+	if m.Role != "" || m.Group != "" {
+		vals := c.GetEntityValue(m.Entity, m.Role, m.Group)
+		fulfilling = vals != nil
+	}
+
+	return eqEntity || fulfilling
 }
 
 // requestNextSlot implements the default routine for determining the next slot
