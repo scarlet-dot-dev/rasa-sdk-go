@@ -61,3 +61,24 @@ func (c *Context) Errorf(format string, args ...interface{}) {
 		c.logger.Errorf(format, args...)
 	}
 }
+
+// EntityValue TODO
+func (c *Context) EntityValue(
+	name, role, group string,
+) (value rasa.EntityValue) {
+	raw := c.EntityValues(name, role, group)
+	if len(raw) == 1 {
+		value = rasa.StringValue(raw[0])
+		return
+	}
+	value = rasa.SliceValue(raw)
+	return
+}
+
+// EntityValues TODO
+func (c *Context) EntityValues(
+	entity, role, group string,
+) (values []string) {
+	values = c.Tracker.LatestEntityValues(entity, role, group)
+	return
+}

@@ -62,27 +62,6 @@ func (c *Context) mappersForSlot(slotToFill string) (m Mappers) {
 	return nil
 }
 
-// GetEntityValue TODO
-func (c *Context) GetEntityValue(
-	name, role, group string,
-) (value rasa.EntityValue) {
-	raw := c.GetLatestEntityValues(name, role, group)
-	if len(raw) == 1 {
-		value = rasa.StringValue(raw[0])
-		return
-	}
-	value = rasa.SliceValue(raw)
-	return
-}
-
-// GetLatestEntityValues TODO
-func (c *Context) GetLatestEntityValues(
-	entity, role, group string,
-) (values []string) {
-	values = c.Tracker.LatestEntityValues(entity, role, group)
-	return
-}
-
 //
 func (c *Context) extractRequestedSlot(rslot string) (values rasa.Slots) {
 	c.Debugf("trying to extract requested slot [%s]", rslot)
