@@ -25,6 +25,17 @@ type Base interface {
 
 	//
 	GetObject(objectType string, identifier string)
+
+	// ForType TODO
+	// ForType(object string) Type
+}
+
+// Type TODO
+type Type interface {
+	Attributes() []string
+	KeyAttribute() string
+	GetObjects(attributes []map[string]string, limit int)
+	GetObject(id string)
 }
 
 // OrdinalMapper TODO
