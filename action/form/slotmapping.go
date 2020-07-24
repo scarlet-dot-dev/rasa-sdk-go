@@ -24,15 +24,15 @@ type Mappers []Mapper
 
 // FromEntity TODO
 type FromEntity struct {
-	Entity string
-	Intent IntentFilter
-	Role   string
-	Group  string
+	Entity  string
+	Intents IntentFilter
+	Role    string
+	Group   string
 }
 
 // Desires implements Mapper.
 func (m FromEntity) Desires(intent string) bool {
-	return m.Intent == nil || m.Intent.Desires(intent)
+	return m.Intents == nil || m.Intents.Desires(intent)
 }
 
 // Extract implements Mapper.
@@ -42,13 +42,13 @@ func (m FromEntity) Extract(ctx *Context) interface{} {
 
 // FromTriggerIntent TODO
 type FromTriggerIntent struct {
-	Value  interface{}
-	Intent IntentFilter
+	Value   interface{}
+	Intents IntentFilter
 }
 
 // Desires implements Mapper.
 func (m FromTriggerIntent) Desires(intent string) bool {
-	return m.Intent == nil || m.Intent.Desires(intent)
+	return m.Intents == nil || m.Intents.Desires(intent)
 }
 
 // Extract implements Mapper.
@@ -60,13 +60,13 @@ func (m FromTriggerIntent) Extract(ctx *Context) interface{} {
 
 // FromIntent TODO
 type FromIntent struct {
-	Value  interface{}
-	Intent IntentFilter
+	Value   interface{}
+	Intents IntentFilter
 }
 
 // Desires implements Mapper.
 func (m FromIntent) Desires(intent string) bool {
-	return m.Intent == nil || m.Intent.Desires(intent)
+	return m.Intents == nil || m.Intents.Desires(intent)
 }
 
 // Extract implements Mapper.
@@ -76,12 +76,12 @@ func (m FromIntent) Extract(ctx *Context) interface{} {
 
 // FromText TODO
 type FromText struct {
-	Intent IntentFilter
+	Intents IntentFilter
 }
 
 // Desires implements Mapper.
 func (m FromText) Desires(intent string) bool {
-	return m.Intent == nil || m.Intent.Desires(intent)
+	return m.Intents == nil || m.Intents.Desires(intent)
 }
 
 // Extract implements Mapper.

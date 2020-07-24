@@ -54,22 +54,28 @@ type IntentFilter interface {
 	Desires(intent string) bool
 }
 
-// AllowIntents implements an IntentFilter based on an allowlist.
-type AllowIntents struct {
-	Intents IntentLister
+// Allow TODO
+func Allow(intents ...string) IntentFilter {
+	return allowIntents{Intents(intents)}
 }
+
+// Block TODO
+func Block(intents ...string) IntentFilter {
+	return blockIntents{Intents(intents)}
+}
+
+// allowIntents implements an IntentFilter based on an allowlist.
+type allowIntents struct{ Intents }
 
 // Desires implements IntentFilter.
-func (a AllowIntents) Desires(intent string) bool {
-	return a.Intents.IntentList().Contains(intent)
+func (a allowIntents) Desires(intent string) bool {
+	return a.Contains(intent)
 }
 
-// BlockIntents implements an IntentFilter based on a blocklist.
-type BlockIntents struct {
-	Intents IntentLister
-}
+// blockIntents implements an IntentFilter based on a blocklist.
+type blockIntents struct{ Intents }
 
 // Desires implements IntentFilter.
-func (b BlockIntents) Desires(intent string) bool {
-	return !b.Intents.IntentList().Contains(intent)
+func (b blockIntents) Desires(intent string) bool {
+	return !b.Contains(intent)
 }
