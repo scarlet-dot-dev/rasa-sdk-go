@@ -39,7 +39,7 @@ func (m *Message) MarshalJSON() (data []byte, err error) {
 	}
 
 	// standard fields
-	var raw JSONMap
+	raw := make(JSONMap)
 	if m.Text != "" {
 		raw["text"] = m.Text
 	}
