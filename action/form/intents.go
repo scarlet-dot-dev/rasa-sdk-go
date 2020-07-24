@@ -56,20 +56,20 @@ type IntentFilter interface {
 
 // AllowIntents implements an IntentFilter based on an allowlist.
 type AllowIntents struct {
-	IntentLister
+	Intents IntentLister
 }
 
 // Desires implements IntentFilter.
 func (a AllowIntents) Desires(intent string) bool {
-	return a.IntentList().Contains(intent)
+	return a.Intents.IntentList().Contains(intent)
 }
 
 // BlockIntents implements an IntentFilter based on a blocklist.
 type BlockIntents struct {
-	IntentLister
+	Intents IntentLister
 }
 
 // Desires implements IntentFilter.
 func (b BlockIntents) Desires(intent string) bool {
-	return !b.IntentList().Contains(intent)
+	return !b.Intents.IntentList().Contains(intent)
 }
