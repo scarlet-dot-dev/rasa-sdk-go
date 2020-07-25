@@ -19,8 +19,24 @@ var _ Mapper = (*FromTriggerIntent)(nil)
 var _ Mapper = (*FromIntent)(nil)
 var _ Mapper = (*FromText)(nil)
 
-// Mappers implements JSON Unmarshaling of Rasa's slot mapper types.
-type Mappers []Mapper
+// SlotMapping is a list of Mappers to map an individual slot.
+type SlotMapping []Mapper
+
+// SlotMappings is an alias type wrapping a mapping of slots to their
+// SlotMapping configurations.
+type SlotMappings map[string]SlotMapping
+
+// Mapping returns the SlotMapping configuration for the provided slot.
+func (m SlotMappings) Mapping(slot string) SlotMapping {
+	if m != nil {
+		if ret, ok := m[slot]; ok && len(ret) > 0 {
+			return ret
+		}
+	}
+
+	// return the default
+	return SlotMapping{FromEntity{Entity: slot}}
+}
 
 // FromEntity TODO
 type FromEntity struct {

@@ -66,7 +66,7 @@ type Handler interface {
 	//
 	// A default implementation of SlotMappers can be provided by embedding
 	// `HandlerDefaults`.
-	SlotMappers() map[string]Mappers
+	SlotMappings() SlotMappings
 
 	// Validator returns a custom validator for the slot. If no custom
 	// validation is needed, the method can return DefaultValidator(slot).
@@ -117,13 +117,13 @@ func (DefaultEmbed) Validate(ctx *Context, disp *action.CollectingDispatcher) (e
 	return
 }
 
-// SlotMappers should return a map of (slot, mapper) values to map required
+// SlotMappings should return a map of (slot, mapper) values to map required
 // slots.
 //
 // If a slot does not have any configured Mappers, it will be treated as a
 // default FromEntity mapper.
-func (DefaultEmbed) SlotMappers() map[string]Mappers {
-	return make(map[string]Mappers)
+func (DefaultEmbed) SlotMappings() SlotMappings {
+	return nil
 }
 
 // Validator returns a custom validator for the slot. If no custom

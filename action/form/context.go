@@ -55,15 +55,8 @@ func (c *Context) shouldRequestSlot(slot string) bool {
 }
 
 //
-func (c *Context) mappersForSlot(slotToFill string) (m Mappers) {
-	mappers := c.handler.SlotMappers()
-	if m = mappers[slotToFill]; len(mappers) > 0 {
-		return
-	}
-
-	// fallback to default mapper
-	m = Mappers{FromEntity{Entity: slotToFill}}
-	return nil
+func (c *Context) mappersForSlot(slotToFill string) SlotMapping {
+	return c.handler.SlotMappings().Mapping(slotToFill)
 }
 
 //
@@ -110,7 +103,7 @@ func (c *Context) extractOtherSlots() (values rasa.Slots) {
 }
 
 // evalMappers
-func (c *Context) evalMappers(mappings Mappers, slot string) (value interface{}) {
+func (c *Context) evalMappers(mappings SlotMapping, slot string) (value interface{}) {
 	for _, mapping := range mappings {
 		// return the first non-nil value we encounter
 		if value = c.evalMapper(mapping, slot); value != nil {
