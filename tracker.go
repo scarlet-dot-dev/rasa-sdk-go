@@ -65,7 +65,8 @@ type ActiveForm struct {
 	TriggerMessage *ParseResult `json:"trigger_message"`
 }
 
-//
+// ShouldValidate returns whether the form should validate itself. It will
+// return true unless validation has been explicitely disabled.
 func (f *ActiveForm) ShouldValidate() bool {
 	if f.Validate == nil {
 		return true
@@ -131,7 +132,8 @@ func (m Slots) String() string {
 	return fmt.Sprintf("%#v", m)
 }
 
-// EntityValues TODO
+// EntityValue specifies an interface over extracted entity values that can be
+// either a single string or a list of strings.
 type EntityValue interface {
 	AsString() string
 	AsSlice() []string
@@ -142,7 +144,8 @@ type EntityValue interface {
 var _ EntityValue = (StringValue)("")
 var _ EntityValue = (SliceValue)(nil)
 
-// EntityValue TODO
+// StringValue implements the EntityValue interface for entities that only
+// contain a single value.
 type StringValue string
 
 // AsString implements EntityValue
@@ -160,7 +163,8 @@ func (v StringValue) Count() int {
 	return 1
 }
 
-// SliceValue TODO
+// SliceValue implements the EntityValue interface for entities that contain
+// more than one value.
 type SliceValue []string
 
 // AsString implements EntityValue
