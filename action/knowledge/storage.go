@@ -9,8 +9,8 @@ import (
 	"math/rand"
 )
 
-// Base TODO
-type Base interface {
+// Storage TODO
+type Storage interface {
 	// GetAttributesOfObject returns a list of all attributes that belong to the
 	// provided object type.
 	Attributes(objectType string) []string
