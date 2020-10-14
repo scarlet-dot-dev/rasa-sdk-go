@@ -135,7 +135,7 @@ func (DefaultEmbed) Validator(slot string) Validator {
 // Deactivate TODO
 func (DefaultEmbed) Deactivate() (events rasa.Events, err error) {
 	events = rasa.Events{
-		rasa.Form{
+		rasa.ActiveLoop{
 			Timestamp: rasa.Time(time.Now()),
 			Name:      "",
 		},

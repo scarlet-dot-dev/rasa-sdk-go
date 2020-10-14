@@ -9,17 +9,18 @@ import "fmt"
 // Tracker contains the state of the Tracker sent to the action server by the
 // Rasa engine.
 type Tracker struct {
-	ConversationID     string       `json:"conversation_id"`
-	SenderID           string       `json:"sender_id"` // TODO(ed): verify if this field is ever set
-	Slots              Slots        `json:"slots,omitempty"`
-	LatestMessage      *ParseResult `json:"latest_message,omitempty"`
-	LatestActionName   string       `json:"latest_action_name,omitempty"`
-	LatestEventTime    Time         `json:"latest_event_time,omitempty"`
-	LatestInputChannel string       `json:"latest_input_channel,omitempty"`
-	Events             Events       `json:"events"`
-	Paused             bool         `json:"paused"`
-	FollowupAction     string       `json:"followup_action,omitempty"`
-	ActiveForm         *ActiveForm  `json:"active_form,omitempty"`
+	SenderID         string       `json:"sender_id"` // TODO(ed): verify if this field is ever set
+	Slots            Slots        `json:"slots,omitempty"`
+	LatestMessage    *ParseResult `json:"latest_message,omitempty"`
+	LatestActionName string       `json:"latest_action_name,omitempty"`
+	Events           Events       `json:"events"`
+	Paused           bool         `json:"paused"`
+	FollowupAction   string       `json:"followup_action,omitempty"`
+	ActiveLoop       *TActiveLoop `json:"active_loop,omitempty"`
+	// These fields are unused in rasa_sdk
+	// ConversationID     string       `json:"conversation_id"`
+	// LatestEventTime    Time         `json:"latest_event_time,omitempty"`
+	// LatestInputChannel string       `json:"latest_input_channel,omitempty"`
 }
 
 // HasSlots returns whether there are any Slots present in the Tracker.
@@ -54,11 +55,11 @@ func (t *Tracker) LatestEntityValues(entity, role, group string) (values []strin
 
 // HasActiveForm returns whether the Tracker state represents an active Form.
 func (t *Tracker) HasActiveForm() bool {
-	return t.ActiveForm.IsActive()
+	return t.ActiveLoop.IsActive()
 }
 
-// ActiveForm holds a ActiveForm description in the Tracker.
-type ActiveForm struct {
+// TActiveLoop holds a ActiveLoop description in the Tracker.
+type TActiveLoop struct {
 	Name           string       `json:"name"`
 	Validate       *bool        `json:"validate,omitempty"`
 	Rejected       bool         `json:"rejected,omitempty"`
@@ -67,7 +68,7 @@ type ActiveForm struct {
 
 // ShouldValidate returns whether the form should validate itself. It will
 // return true unless validation has been explicitely disabled.
-func (f *ActiveForm) ShouldValidate() bool {
+func (f *TActiveLoop) ShouldValidate() bool {
 	if f.Validate == nil {
 		return true
 	}
@@ -75,12 +76,12 @@ func (f *ActiveForm) ShouldValidate() bool {
 }
 
 // IsActive returns whether f represents an active Form.
-func (f *ActiveForm) IsActive() bool {
+func (f *TActiveLoop) IsActive() bool {
 	return f != nil && f.Name != ""
 }
 
 // Is returns whether f represents a Form with the provided name.
-func (f *ActiveForm) Is(name string) bool {
+func (f *TActiveLoop) Is(name string) bool {
 	return f != nil && f.Name == name
 }
 

@@ -55,7 +55,7 @@ func (a *Action) Run(
 	}
 
 	// if validation caused the form to be deactivated, abort
-	if ec.containsFormDeactivate() {
+	if ec.containsLoopDeactivate() {
 		return
 	}
 
@@ -91,7 +91,7 @@ func (a *Action) String() string {
 //
 //
 
-// Activate form if the form is called for the fist timne.
+// Activate loop if the loop is called for the fist timne.
 //
 // When activating, required slots will be validated if they were filled in
 // prior to the form's activation, the rasa.Form event will be returned with the
@@ -104,18 +104,18 @@ func (a *Action) activateIfRequired(
 	ec := (*eventCapture)(&events)
 
 	if ctx.Tracker.HasActiveForm() {
-		ctx.Debugf("the form [%s] is active", ctx.Tracker.ActiveForm.Name)
+		ctx.Debugf("the loop [%s] is active", ctx.Tracker.ActiveLoop.Name)
 	} else {
-		ctx.Debugf("there is no active form", ctx.Tracker.ActiveForm.Name)
+		ctx.Debugf("there is no active loop", ctx.Tracker.ActiveLoop.Name)
 	}
 
-	if ctx.Tracker.ActiveForm.Is(a.Handler.FormName()) {
+	if ctx.Tracker.ActiveLoop.Is(a.Handler.FormName()) {
 		// we are active - nothing to do
 		return
 	}
 
 	// activate the form
-	ec.append(rasa.Form{
+	ec.append(rasa.ActiveLoop{
 		Timestamp: rasa.Time(time.Now()),
 		Name:      a.Handler.FormName(),
 	})
@@ -184,10 +184,10 @@ func (c *eventCapture) capture(e rasa.Events, ce error) (added int, err error) {
 	return
 }
 
-// containsFormDeactivate
-func (c *eventCapture) containsFormDeactivate() bool {
+// containsLoopDeactivate
+func (c *eventCapture) containsLoopDeactivate() bool {
 	for _, event := range *c {
-		if e, ok := event.(*rasa.Form); ok {
+		if e, ok := event.(*rasa.ActiveLoop); ok {
 			if e.Name == "" {
 				return true
 			}

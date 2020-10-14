@@ -6,6 +6,8 @@ package action
 
 import (
 	"context"
+	"reflect"
+	"time"
 
 	"go.scarlet.dev/rasa"
 )
@@ -19,6 +21,9 @@ type Context struct {
 
 	//
 	Domain *rasa.Domain
+
+	//
+	nowfn func() time.Time
 
 	// internal fields
 	logger  Logger
@@ -62,6 +67,32 @@ func (c *Context) Errorf(format string, args ...interface{}) {
 	}
 }
 
+// SetSlot TODO
+func (c *Context) SetSlot(name string, val interface{}) rasa.SlotSet {
+	return rasa.SlotSet{
+		Timestamp: rasa.Time(time.Now()),
+		Key:       name,
+		Value:     val,
+	}
+}
+
+// ResetSlot TODO
+func (c *Context) ResetSlot(name string) rasa.SlotSet {
+	return rasa.SlotSet{
+		Timestamp: rasa.Time(time.Now()),
+		Key:       name,
+		Value:     nil,
+	}
+}
+
+// Now returns the current time in the wrapper type rasa.Time.
+func (c *Context) Now() rasa.Time {
+	if c.nowfn != nil {
+		return rasa.Time(c.nowfn())
+	}
+	return rasa.Time(time.Now())
+}
+
 // EntityValue TODO
 func (c *Context) EntityValue(
 	name, role, group string,
@@ -80,5 +111,28 @@ func (c *Context) EntityValues(
 	entity, role, group string,
 ) (values []string) {
 	values = c.Tracker.LatestEntityValues(entity, role, group)
+	return
+}
+
+// Slot TODO
+func (c *Context) Slot(name string) (val interface{}, ok bool) {
+	val, ok = c.Tracker.Slots[name]
+	return
+}
+
+// SlotAs TODO
+func (c *Context) SlotAs(name string, dst interface{}) (ok bool) {
+	val, exists := c.Slot(name)
+	if !exists {
+		return
+	}
+
+	rdst := reflect.ValueOf(dst)
+	rval := reflect.ValueOf(val)
+	if ok = rdst.CanSet() && rval.Type().AssignableTo(rdst.Type()); !ok {
+		return
+	}
+
+	rdst.Set(reflect.ValueOf(val))
 	return
 }

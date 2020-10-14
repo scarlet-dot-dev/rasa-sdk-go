@@ -4,16 +4,15 @@
 
 package action
 
-// JSONMap TODO
-type JSONMap map[string]interface{}
+import "go.scarlet.dev/rasa"
 
 // CollectingDispatcher implements a response collector.
 //
 // The implementation differs from Rasa's Python SDK by not supporting `kwargs`.
-type CollectingDispatcher []Message
+type CollectingDispatcher []rasa.Message
 
 // Utter will add the Message to the response list.
-func (d *CollectingDispatcher) Utter(msg *Message) {
+func (d *CollectingDispatcher) Utter(msg *rasa.Message) {
 	*d = append(*d, *msg)
 }
 

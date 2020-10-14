@@ -29,7 +29,7 @@ func (testHandlerNoDispatch) ActionName() string { return "action_no_dispatch" }
 func (testHandlerErr) ActionName() string        { return "action_error" }
 
 func (testHandler1) Run(ctx *Context, dispatcher *CollectingDispatcher) (events rasa.Events, err error) {
-	dispatcher.Utter(&Message{
+	dispatcher.Utter(&rasa.Message{
 		Text: "test string",
 	})
 	events = append(events, &rasa.SlotSet{
@@ -40,7 +40,7 @@ func (testHandler1) Run(ctx *Context, dispatcher *CollectingDispatcher) (events 
 }
 
 func (testHandlerNoEvent) Run(ctx *Context, dispatcher *CollectingDispatcher) (events rasa.Events, err error) {
-	dispatcher.Utter(&Message{
+	dispatcher.Utter(&rasa.Message{
 		Text: "test string",
 	})
 	return
@@ -144,7 +144,7 @@ func TestServer(t *testing.T) {
 	t.Run("endpoint /webhook", func(t *testing.T) {
 		t.Run("action_test", func(t *testing.T) {
 			expect := Response{
-				Responses: []Message{{
+				Responses: []rasa.Message{{
 					Text: "test string",
 				}},
 				Events: rasa.Events{
@@ -179,7 +179,7 @@ func TestServer(t *testing.T) {
 
 		t.Run("action_no_event", func(t *testing.T) {
 			expect := Response{
-				Responses: []Message{{
+				Responses: []rasa.Message{{
 					Text: "test string",
 				}},
 				Events: rasa.Events{}, // Rasa expects an empty, non-nil list of events.
@@ -209,7 +209,7 @@ func TestServer(t *testing.T) {
 		})
 		t.Run("action_no_dispatch", func(t *testing.T) {
 			expect := Response{
-				Responses: []Message{}, // Rasa expects non-nil values
+				Responses: []rasa.Message{}, // Rasa expects non-nil values
 				Events: rasa.Events{
 					&rasa.SlotSet{
 						Key:   "test",

@@ -29,8 +29,8 @@ type Request struct {
 // Response is the response body for the action server in case of
 // successful handling of the request.
 type Response struct {
-	Events    rasa.Events `json:"events"`
-	Responses []Message   `json:"responses"`
+	Events    rasa.Events    `json:"events"`
+	Responses []rasa.Message `json:"responses"`
 }
 
 // Server implements http.Handler for the Action Server endpoint.

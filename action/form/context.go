@@ -121,7 +121,7 @@ func (c *Context) evalMapper(m Mapper, slot string) interface{} {
 			return c.EntityValue(m.Entity, m.Role, m.Group)
 		}
 	case FromTriggerIntent:
-		if c.intentIsDesired(m) && c.Tracker.ActiveForm.Is(c.handler.FormName()) {
+		if c.intentIsDesired(m) && c.Tracker.ActiveLoop.Is(c.handler.FormName()) {
 			return m.Value
 		}
 	}
@@ -161,7 +161,7 @@ func (c *Context) requestNextSlot(
 	for _, slot := range required {
 		if c.shouldRequestSlot(slot) {
 			c.Debugf("request next slot [%s]", slot)
-			dispatcher.Utter(&action.Message{
+			dispatcher.Utter(&rasa.Message{
 				Template: fmt.Sprintf("utter_ask_%s", slot),
 				Kwargs:   c.Tracker.Slots,
 			})
@@ -187,5 +187,5 @@ func (c *Context) requestNextSlot(
 func (c *Context) shouldValidate() bool {
 	return c.Tracker.LatestActionName == "action_listen" &&
 		c.Tracker.HasActiveForm() &&
-		c.Tracker.ActiveForm.ShouldValidate()
+		c.Tracker.ActiveLoop.ShouldValidate()
 }
