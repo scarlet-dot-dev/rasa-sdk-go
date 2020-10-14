@@ -1,7 +1,7 @@
 # Rasa SDK - Golang (Work In Progress)
 
 [![GoDoc](https://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://pkg.go.dev/go.scarlet.dev/rasa)
-[![License](https://img.shields.io/github/license/scarlet-ai/rasa-sdk-go?style=flat-square)](https://https://www.mozilla.org/en-US/MPL/2.0/)
+[![License](https://img.shields.io/github/license/scarlet-dot-dev/rasa-sdk-go?style=flat-square)](https://www.mozilla.org/en-US/MPL/2.0/)
 
 This package provides an SDK for Rasa chatbots, written in Go.
 
