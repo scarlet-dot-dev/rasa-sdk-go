@@ -1,4 +1,4 @@
-# Rasa SDK - Golang
+# Rasa SDK - Golang (Work In Progress)
 
 [![GoDoc](https://img.shields.io/badge/go-documentation-blue.svg?style=for-the-badge)](https://pkg.go.dev/go.scarlet.dev/rasa)
 [![License](https://img.shields.io/github/license/scarlet-ai/rasa-sdk-go?style=for-the-badge)](https://https://www.mozilla.org/en-US/MPL/2.0/)
@@ -7,7 +7,7 @@ This package provides an SDK for Rasa chatbots written in Go.
 
 ## Rasa Features
 
-This package implements the SDK based on the specifications for `Rasa 1.9.*`.
+This package implements the SDK based on the specifications for `Rasa 2.0.0`.
 
 **Features:**
 
@@ -17,7 +17,12 @@ This package implements the SDK based on the specifications for `Rasa 1.9.*`.
 * Exposes an API is similar to the python SDK.
 * Configurable logging and server settings.
 * Code generation CLI for boilerplate and constants, based on Rasa's
-  `domain.yaml`.  
+  `domain.yaml`. (TODO)
+* Clients for the `Rest` and `Callback` webhooks.
+
+**Notes:**
+
+* Support for KWargs is _experimental_.
 
 ## Import
 
