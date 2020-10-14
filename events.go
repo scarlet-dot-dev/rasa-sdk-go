@@ -11,7 +11,7 @@ import (
 
 	"github.com/fatih/structs"
 	"github.com/pkg/errors"
-	"go.scarlet.dev/rasa/handle"
+	"go.scarlet.dev/rasa/internal/handle"
 )
 
 // EventType TODO

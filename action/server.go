@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"go.scarlet.dev/rasa"
-	"go.scarlet.dev/rasa/handle"
+	"go.scarlet.dev/rasa/internal/handle"
 )
 
 // Request is the request body for the webhook request.

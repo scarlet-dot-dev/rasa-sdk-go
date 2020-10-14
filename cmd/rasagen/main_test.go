@@ -2,16 +2,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-package rasa
+package main
 
-// SlotName TODO
-type SlotName string
+import "testing"
 
-// IntentName TODO
-type IntentName string
-
-// EntityName TODO
-type EntityName string
-
-// ActionName TODO
-type ActionName string
+func TestCompile(t *testing.T) {
+	// no-op
+}

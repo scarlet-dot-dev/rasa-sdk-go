@@ -18,7 +18,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"go.scarlet.dev/rasa/handle"
+	"go.scarlet.dev/rasa/internal/handle"
 	"gopkg.in/yaml.v2"
 )
 

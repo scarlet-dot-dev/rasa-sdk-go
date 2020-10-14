@@ -4,7 +4,17 @@
 
 package rasa
 
-// DefaultServerPort is the default port for the Rasa Action Server.
-//
-// This port is used for both the `/webhook` and `/nlg` endpoints.
-const DefaultServerPort = "5055"
+const (
+	// DefaultServerPort is the default port for the Rasa Action Server.
+	//
+	// This port is used for both the `/webhook` and `/nlg` endpoints.
+	DefaultServerPort = "5055"
+
+	// DefaultRasaAPIPort is the default port for the Rasa API.
+	//
+	// Used by the webhooks package.
+	DefaultRasaAPIPort = "5005"
+
+	// DefaultRasaEndpoint is the default endpoint used by webhook clients.
+	DefaultRasaEndpoint = "http://localhost:5005"
+)
