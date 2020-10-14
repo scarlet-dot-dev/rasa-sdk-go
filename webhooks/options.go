@@ -12,11 +12,8 @@ import (
 
 // RequestOption can be used to inject middleware into the clients / requests.
 type RequestOption interface {
-	//
-	// Inject will be called after the request is built up by the client and
-	// before it is sent over the wire.
-	//
-	// Inject can be used to provide credentials.
+	// Apply will be called after the request is built, before the call is sent
+	// to the server.
 	Apply(ctx context.Context, r *http.Request)
 }
 
