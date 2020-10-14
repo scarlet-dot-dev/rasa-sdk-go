@@ -17,7 +17,7 @@ This package implements the SDK based on the specifications for `Rasa 2.0.0`.
 * Exposes an API is similar to the python SDK.
 * Configurable logging and server settings.
 * Code generation CLI for boilerplate and constants, based on Rasa's
-  `domain.yaml`. (TODO)
+  `domain.yaml`. (TODO - current version is outdated)
 * Clients for the `Rest` and `Callback` webhooks.
 
 **Notes:**
