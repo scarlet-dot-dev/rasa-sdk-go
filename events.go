@@ -183,9 +183,9 @@ type ActionReverted struct {
 
 // AgentUttered TODO
 type AgentUttered struct {
-	Timestamp Time                   `json:"timestamp,omitempty"`
-	Text      string                 `json:"test,omitempty"`
-	Data      map[string]interface{} `json:"data,omitempty"`
+	Timestamp Time    `json:"timestamp,omitempty"`
+	Text      string  `json:"test,omitempty"`
+	Data      JSONMap `json:"data,omitempty"`
 }
 
 // AllSlotsReset TODO
@@ -195,10 +195,10 @@ type AllSlotsReset struct {
 
 // BotUttered TODO
 type BotUttered struct {
-	Timestamp Time                   `json:"timestamp,omitempty"`
-	Text      string                 `json:"text,omitempty"`
-	Data      map[string]interface{} `json:"data,omitempty"`
-	Metadata  map[string]interface{} `json:"metadata,omitempty"`
+	Timestamp Time    `json:"timestamp,omitempty"`
+	Text      string  `json:"text,omitempty"`
+	Data      JSONMap `json:"data,omitempty"`
+	Metadata  JSONMap `json:"metadata,omitempty"`
 }
 
 // ConversationPaused TODO
@@ -231,20 +231,20 @@ type LoopInterrupted struct {
 
 // ReminderCancelled TODO
 type ReminderCancelled struct {
-	Timestamp  Time                     `json:"timestamp,omitempty"`
-	Name       string                   `json:"name,omitempty"`
-	IntentName string                   `json:"intent,omitempty"`
-	Entities   []map[string]interface{} `json:"entities,omitempty"`
+	Timestamp  Time      `json:"timestamp,omitempty"`
+	Name       string    `json:"name,omitempty"`
+	IntentName string    `json:"intent,omitempty"`
+	Entities   []JSONMap `json:"entities,omitempty"`
 }
 
 // ReminderScheduled TODO
 type ReminderScheduled struct {
-	Timestamp         Time                     `json:"timestamp,omitempty"`
-	Name              string                   `json:"name,omitempty"`
-	IntentName        string                   `json:"intent,omitempty"`
-	Entities          []map[string]interface{} `json:"entities,omitempty"`
-	DateTime          time.Time                `json:"date_time"`
-	KillOnUserMessage bool                     `json:"kill_on_user_msg"`
+	Timestamp         Time      `json:"timestamp,omitempty"`
+	Name              string    `json:"name,omitempty"`
+	IntentName        string    `json:"intent,omitempty"`
+	Entities          []JSONMap `json:"entities,omitempty"`
+	DateTime          time.Time `json:"date_time"`
+	KillOnUserMessage bool      `json:"kill_on_user_msg"`
 }
 
 // Restarted TODO
@@ -276,10 +276,10 @@ type UserUtteranceReverted struct {
 
 // UserUttered TODO
 type UserUttered struct {
-	Timestamp    Time                   `json:"timestamp,omitempty"`
-	Text         string                 `json:"text,omitempty"`
-	ParseData    map[string]interface{} `json:"parse_data,omitempty"`
-	InputChannel string                 `json:"input_channel,omitempty"`
+	Timestamp    Time    `json:"timestamp,omitempty"`
+	Text         string  `json:"text,omitempty"`
+	ParseData    JSONMap `json:"parse_data,omitempty"`
+	InputChannel string  `json:"input_channel,omitempty"`
 }
 
 // Type implements Event.
