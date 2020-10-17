@@ -18,9 +18,16 @@ type Message struct {
 	JSONMessage JSONMap   `json:"json_message,omitempty"`
 	Template    string    `json:"template,omitempty"`
 	Attachment  string    `json:"attachment,omitempty"`
-	Buttons     []JSONMap `json:"buttons,omitempty"`
+	Buttons     []Button  `json:"buttons,omitempty"`
 	Elements    []JSONMap `json:"elements,omitempty"`
-	Kwargs      JSONMap   `json:"-"` // FIXME implement custom ser/de
+
+	// Kwargs holds additional fields at the root level of the object that are
+	// not otherwise provided in the default Message struct.
+	//
+	// Kwargs are used internally by the action server. Prefer using the
+	// JSONMessage field if custom payloads are required to avoid conflicts with
+	// the library.
+	Kwargs JSONMap `json:"-"` // FIXME implement custom ser/de
 }
 
 // ensure interfaces.
@@ -73,4 +80,14 @@ func (m *Message) MarshalJSON() (data []byte, err error) {
 	}
 
 	return json.Marshal(raw)
+}
+
+// Button defines the structure of a Button response.
+//
+// A button can be clicked by the user in a conversation.
+type Button struct {
+	// Title holds teh text on the button.
+	Title string `json:"title"`
+	// Payload holds the payload being sent if the button is pressed.
+	Payload string `json:"payload"`
 }
