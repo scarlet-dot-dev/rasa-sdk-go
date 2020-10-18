@@ -13,13 +13,35 @@ type JSONMap = map[string]interface{}
 
 // Message TODO
 type Message struct {
-	Text        string    `json:"text,omitempty"`
-	Image       string    `json:"image,omitempty"`
-	JSONMessage JSONMap   `json:"json_message,omitempty"`
-	Template    string    `json:"template,omitempty"`
-	Attachment  string    `json:"attachment,omitempty"`
-	Buttons     []Button  `json:"buttons,omitempty"`
-	Elements    []JSONMap `json:"elements,omitempty"`
+	// RecipientID is used by Rasa for messages sent over an output channel.
+	RecipientID string `json:"recipient_id,omitempty"`
+
+	// Text contains a text payload.
+	Text string `json:"text,omitempty"`
+
+	// Image contains an image payload in the form of an URL. For direct image
+	// transfer, use a data-url.
+	Image string `json:"image,omitempty"`
+
+	// JSONMessage allows custom data to be included in the payload.
+	JSONMessage JSONMap `json:"json_message,omitempty"`
+
+	// Template holds a template name to be used.
+	//
+	// A client should never consult this field. It is used by NLG and
+	// Rasa-internal endpoints to generate responses based on templates when the
+	// template identifiers are returned by a custom action server.
+	Template string `json:"template,omitempty"`
+
+	// Buttons contains a list of clickable buttons that should be rendered by
+	// the UI.
+	Buttons []Button `json:"buttons,omitempty"`
+
+	// Attachment.
+	Attachment string `json:"attachment,omitempty"`
+
+	// Elements.
+	Elements []JSONMap `json:"elements,omitempty"`
 
 	// Kwargs holds additional fields at the root level of the object that are
 	// not otherwise provided in the default Message struct.
