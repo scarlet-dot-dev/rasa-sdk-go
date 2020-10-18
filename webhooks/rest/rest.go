@@ -4,38 +4,40 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-package webhooks
+package rest
 
 import (
 	"context"
 
 	"go.scarlet.dev/rasa"
+	"go.scarlet.dev/rasa/webhooks"
+	"go.scarlet.dev/rasa/webhooks/internal"
 )
 
-// RestInput TODO
-type RestInput struct {
+// Input TODO
+type Input struct {
 	Sender   string       `json:"sender"`
 	Message  string       `json:"message"`
 	Metadata rasa.JSONMap `json:"metadata,omitempty"`
 }
 
-// Rest implements a client to the Rest webhook.
-type Rest struct {
-	*baseClient
+// Client implements a client to the Client webhook.
+type Client struct {
+	*internal.BaseClient
 }
 
 // NewRest creates a new client to the Rest webhook.
-func NewRest(opts *ClientOpts) *Rest {
-	return &Rest{
-		baseClient: &baseClient{
+func NewRest(opts *webhooks.ClientOpts) *Client {
+	return &Client{
+		BaseClient: &internal.BaseClient{
 			ClientOpts: opts,
-			channel:    "rest",
+			Channel:    "rest",
 		},
 	}
 }
 
 // Send TODO
-func (c *Rest) Send(ctx context.Context, in *RestInput, opts ...RequestOption) (out []rasa.Message, err error) {
-	err = c.baseClient.request(ctx, &out, in, opts...)
+func (c *Client) Send(ctx context.Context, in *Input, opts ...webhooks.RequestOption) (out []rasa.Message, err error) {
+	err = c.BaseClient.Request(ctx, &out, in, opts...)
 	return
 }

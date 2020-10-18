@@ -4,38 +4,40 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-package webhooks
+package callback
 
 import (
 	"context"
 
 	"go.scarlet.dev/rasa"
+	"go.scarlet.dev/rasa/webhooks"
+	"go.scarlet.dev/rasa/webhooks/internal"
 )
 
-// CallbackInput TODO
-type CallbackInput struct {
+// Input TODO
+type Input struct {
 	Sender   string       `json:"sender"`
 	Message  string       `json:"message"`
 	Metadata rasa.JSONMap `json:"metadata,omitempty"`
 }
 
-// Callback implements a client to the Callback webhook.
-type Callback struct {
-	*baseClient
+// Client implements a client to the Client webhook.
+type Client struct {
+	*internal.BaseClient
 }
 
 // NewCallback creates a new client to the Callback webhook.
-func NewCallback(opts *ClientOpts) *Callback {
-	return &Callback{
-		baseClient: &baseClient{
+func NewCallback(opts *webhooks.ClientOpts) *Client {
+	return &Client{
+		BaseClient: &internal.BaseClient{
 			ClientOpts: opts,
-			channel:    "callback",
+			Channel:    "callback",
 		},
 	}
 }
 
 // Send TODO
-func (c *Callback) Send(ctx context.Context, in *CallbackInput, opts ...RequestOption) (err error) {
-	err = c.baseClient.request(ctx, in, nil, opts...)
+func (c *Client) Send(ctx context.Context, in *Input, opts ...webhooks.RequestOption) (err error) {
+	err = c.BaseClient.Request(ctx, in, nil, opts...)
 	return
 }

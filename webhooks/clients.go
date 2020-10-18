@@ -7,14 +7,10 @@
 package webhooks
 
 import (
-	"bytes"
-	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/pkg/errors"
 	"go.scarlet.dev/rasa"
 )
 
@@ -39,8 +35,8 @@ func (c *ClientOpts) endpoint() string {
 	return strings.TrimSuffix(c.Endpoint, "/")
 }
 
-//
-func (c *ClientOpts) webhookURL(channel string) string {
+// WebhookURL returns the url for the webhook of the provided channel.
+func (c *ClientOpts) WebhookURL(channel string) string {
 	return fmt.Sprintf(
 		"%s/webhooks/%s/webhook",
 		c.endpoint(),
@@ -48,60 +44,11 @@ func (c *ClientOpts) webhookURL(channel string) string {
 	)
 }
 
-//
-func (c *ClientOpts) httpClient() *http.Client {
+// HTTPClient returns the configured http.Client, or the default if none is
+// provided.
+func (c *ClientOpts) HTTPClient() *http.Client {
 	if c == nil || c.Client == nil {
 		return http.DefaultClient
 	}
 	return c.Client
-}
-
-// baseClient
-type baseClient struct {
-	*ClientOpts
-	channel string
-}
-
-// request TODO
-func (c *baseClient) request(ctx context.Context, dst, body interface{}, opts ...RequestOption) (err error) {
-	data, err := json.Marshal(body)
-	if err != nil {
-		return
-	}
-
-	r, err := http.NewRequestWithContext(
-		ctx,
-		http.MethodPost,
-		c.webhookURL(c.channel),
-		bytes.NewBuffer(data),
-	)
-	if err != nil {
-		return
-	}
-
-	// apply middleware
-	for i := range opts {
-		opts[i].Apply(ctx, r)
-	}
-
-	resp, err := c.httpClient().Do(r)
-	if err != nil {
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		err = errors.Errorf("request code [%s]", resp.Status)
-		return
-	}
-
-	if dst == nil {
-		return
-	}
-
-	if err = json.NewDecoder(resp.Body).Decode(dst); err != nil {
-		return
-	}
-
-	return
 }
