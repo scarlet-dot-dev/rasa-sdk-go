@@ -11,14 +11,15 @@ This package implements an SDK based on the specifications for `Rasa 2.0.*`.
 
 **Features:**
 
-* Supports implementing custom action handlers at `/webhook`.
-* Supports implementing a custom NLG endpoint at `/nlg`. _(TODO)_
-* Supports the additional `/`, `/actions`, and `/health` endpoints.
+* Custom action handlers at `/webhook`.
+* Custom NLG endpoint at `/nlg`. _(TODO)_
+* Supports additional `/`, `/actions`, and `/health` endpoints.
 * Exposes an API similar to the python SDK.
 * Configurable logging and server settings.
 * Code generation utility `rasagen` for boilerplate and constants, based on
   Rasa's `domain.yaml`. _(TODO - current version is outdated)_
 * Clients for the `Rest` and `Callback` webhooks.
+* `Callback` output channel support.
 
 **Notes:**
 
