@@ -18,9 +18,9 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/pkg/errors"
+	perrors "github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"go.scarlet.dev/rasa/internal/handle"
+	errors "go.scarlet.dev/errors"
 	"gopkg.in/yaml.v2"
 )
 
@@ -60,7 +60,7 @@ var (
 		Use:   "actions",
 		Short: "generate boilerplate for a custom action server",
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			defer handle.Error(&err, func(err error) error {
+			defer errors.Handle(&err, func(err error) error {
 				fmt.Println("encountered an error: " + err.Error())
 				return nil
 			})
@@ -70,11 +70,11 @@ var (
 			func() {
 				log.Printf("loading domain from %s\n", rootCtx.DomainFile)
 				file, err := os.Open(rootCtx.DomainFile)
-				handle.Check(err)
+				errors.Check(err)
 				defer file.Close()
 
 				err = yaml.NewDecoder(file).Decode(&config)
-				handle.Check(err)
+				errors.Check(err)
 			}()
 
 			// TODO(ed): make sure ALL config slices are sorted
@@ -87,14 +87,14 @@ var (
 				var buff bytes.Buffer
 
 				err = tmpl.Execute(&buff, &ctx)
-				handle.Check(err)
+				errors.Check(err)
 
 				output, err := format.Source(buff.Bytes())
-				err = errors.WithMessage(err, "formatting failed for "+filename)
-				handle.Check(err)
+				err = perrors.WithMessage(err, "formatting failed for "+filename)
+				errors.Check(err)
 
 				err = ioutil.WriteFile(filepath.Join(actionsCtx.OutDir, filename), output, 0666)
-				handle.Check(err)
+				errors.Check(err)
 			}
 
 			// generate constants

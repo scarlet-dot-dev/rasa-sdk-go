@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
+	"go.scarlet.dev/errors"
 	"go.scarlet.dev/rasa"
-	"go.scarlet.dev/rasa/internal/handle"
 )
 
 // Request is the request body for the webhook request.
@@ -226,7 +226,7 @@ func (s *Server) withLogs(
 	// ensure error handling
 	var err error
 	defer s.serveError(w, &err)
-	defer handle.Error(&err, func(err error) error {
+	defer errors.Handle(&err, func(err error) error {
 		s.errorf("%s - %s : %s", r.Method, r.URL.String(), err.Error())
 		return err
 	})

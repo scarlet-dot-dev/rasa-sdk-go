@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/fatih/structs"
-	"github.com/pkg/errors"
-	"go.scarlet.dev/rasa/internal/handle"
+	perrors "github.com/pkg/errors"
+	"go.scarlet.dev/errors"
 )
 
 // EventType TODO
@@ -57,8 +57,8 @@ var _ json.Unmarshaler = (*Events)(nil)
 
 // UnmarshalJSON implements json.Unmarshaler.
 func (l *Events) UnmarshalJSON(data []byte) (err error) {
-	defer handle.Error(&err, func(err error) error {
-		return errors.WithMessage(err, "unable to unmarshal EventList")
+	defer errors.Handle(&err, func(err error) error {
+		return perrors.WithMessage(err, "unable to unmarshal EventList")
 	})
 
 	// initialize as empty eventlist

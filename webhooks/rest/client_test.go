@@ -4,10 +4,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-package handle
+package rest
 
 import "testing"
 
-func TestCompile(t *testing.T) {
-	// TODO
+func TestCompiles(t *testing.T) {
+	// no-op
 }
