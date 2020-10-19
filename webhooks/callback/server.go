@@ -24,6 +24,7 @@ type Receiver interface {
 // ensure interface
 var _ Receiver = (ReceiverFn)(nil)
 var _ Receiver = (*NoopReceiver)(nil)
+var _ Receiver = (*JSONReceiver)(nil)
 
 // ReceiverFn implements the Receiver interface for functions.
 type ReceiverFn func(context.Context, []rasa.Message) error
@@ -34,10 +35,10 @@ func (fn ReceiverFn) Receive(ctx context.Context, messages []rasa.Message) error
 }
 
 // WithLogging TODO
-func WithLogging(r Receiver, logger func(m rasa.Message)) Receiver {
+func WithLogging(r Receiver, logger func(m *rasa.Message)) Receiver {
 	return ReceiverFn(func(c context.Context, m []rasa.Message) error {
 		for i := range m {
-			logger(m[i])
+			logger(&m[i])
 		}
 		return r.Receive(c, m)
 	})
@@ -53,6 +54,19 @@ type NoopReceiver struct{}
 // Receive implements Receiver.
 func (NoopReceiver) Receive(context.Context, []rasa.Message) error {
 	return nil
+}
+
+// JSONReceiver implements the Receiver interface with a json encoder
+type JSONReceiver struct {
+	*json.Encoder
+}
+
+// Receive implements Receiver.
+func (r *JSONReceiver) Receive(ctx context.Context, m []rasa.Message) (err error) {
+	for i := range m {
+		r.Encode(&m[i])
+	}
+	return
 }
 
 // Handler implements the http.Handler interface for the callback endpoint.
