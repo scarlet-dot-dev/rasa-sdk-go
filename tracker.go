@@ -6,7 +6,9 @@
 
 package rasa
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Tracker contains the state of the Tracker sent to the action server by the
 // Rasa engine.
@@ -57,7 +59,36 @@ func (t *Tracker) LatestEntityValues(entity, role, group string) (values []strin
 
 // HasActiveForm returns whether the Tracker state represents an active Form.
 func (t *Tracker) HasActiveForm() bool {
+	return t.HasActiveLoop()
+}
+
+// HasActiveLoop returns whether the Tracker state represents an active Loop.
+func (t *Tracker) HasActiveLoop() bool {
 	return t.ActiveLoop.IsActive()
+}
+
+// SlotsToValidate returns the slots which were recently set.
+//
+// This can be used to validate form slots after they were extracted.
+func (t *Tracker) SlotsToValidate() (slots Slots) {
+	slots = make(map[string]interface{})
+	events := t.Events
+
+	// look at the newest events in the tracker
+	for i := len(events) - 1; i >= 0; i-- {
+		// The `FormAction` in Rasa Open Source will append all slot candidates
+		// at the end of the tracker events.
+		if se, ok := events[i].(*SlotSet); ok {
+			slots[se.Key] = se.Value
+			continue
+		}
+
+		// found a different event type - stop the loop
+		break
+	}
+
+	// return the found slots
+	return
 }
 
 // TActiveLoop holds a ActiveLoop description in the Tracker.

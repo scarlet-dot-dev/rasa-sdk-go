@@ -11,34 +11,34 @@ import (
 	"go.scarlet.dev/rasa/action"
 )
 
-// Validator specifies the interface for a custom Slot Validator.
-type Validator interface {
+// SlotValidator specifies the interface for a custom Slot SlotValidator.
+type SlotValidator interface {
 	// Validate will receive a slot value to perform validation on.
 	//
 	// The returned slots map may contain any set of (slot, value) mappings to
 	// pass back to Rasa. It is up to the developer to ensure these slots are
 	// all valid.
 	Validate(
-		ctx *Context,
+		ctx *ValidatorContext,
 		dispatcher *action.CollectingDispatcher,
 		value interface{},
 	) (slots rasa.Slots, err error)
 }
 
 // ensure interface
-var _ Validator = (ValidatorFunc)(nil)
-var _ Validator = (DefaultValidator)("")
+var _ SlotValidator = (SlotValidatorFunc)(nil)
+var _ SlotValidator = (DefaultValidator)("")
 
-// ValidatorFunc is a wrapper type for functions that may be used as Validator
+// SlotValidatorFunc is a wrapper type for functions that may be used as Validator
 // implementations.
-type ValidatorFunc func(
-	ctx *Context,
+type SlotValidatorFunc func(
+	ctx *ValidatorContext,
 	dispatcher *action.CollectingDispatcher,
 	value interface{},
 ) (rasa.Slots, error)
 
 // Validate implements Validator.
-func (fn ValidatorFunc) Validate(ctx *Context, dispatcher *action.CollectingDispatcher, value interface{}) (rasa.Slots, error) {
+func (fn SlotValidatorFunc) Validate(ctx *ValidatorContext, dispatcher *action.CollectingDispatcher, value interface{}) (rasa.Slots, error) {
 	return fn(ctx, dispatcher, value)
 }
 
@@ -48,7 +48,7 @@ type DefaultValidator string
 
 // Validate implements Validator.
 func (v DefaultValidator) Validate(
-	ctx *Context,
+	ctx *ValidatorContext,
 	dispatcher *action.CollectingDispatcher,
 	value interface{},
 ) (slots rasa.Slots, err error) {
