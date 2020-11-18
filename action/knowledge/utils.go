@@ -95,7 +95,7 @@ func getAttributeSlots(ctx *Context, attrs []string) []Attribute {
 
 	for i := range attrs {
 		attr := attrs[i]
-		attrVal, ok := ctx.Tracker.Slots[attr]
+		attrVal, ok := ctx.Tracker().Slots[attr]
 		if sval, sok := attrVal.(string); ok && sok && sval != "" {
 			vals = append(vals, Attribute{
 				Name:  attr,
@@ -124,7 +124,7 @@ func getAttributeSlots(ctx *Context, attrs []string) []Attribute {
 func resetAttributeSlots(ctx *Context, attrs []string) (events rasa.Events) {
 	for i := range attrs {
 		attr := attrs[i]
-		attrVal, ok := ctx.Tracker.Slots[attr]
+		attrVal, ok := ctx.Tracker().Slots[attr]
 		if ok && attrVal != nil {
 			events = append(events, rasa.SlotSet{
 				Key:       attr,

@@ -33,7 +33,7 @@ type Utterer interface {
 // Context provides default implementations for methods of the KnowledgeBase
 // interface.
 type Context struct {
-	*action.Context
+	action.Context
 }
 
 //

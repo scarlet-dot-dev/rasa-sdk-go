@@ -15,7 +15,7 @@ import (
 
 // ValidatorContext TODO
 type ValidatorContext struct {
-	*action.Context
+	action.Context
 	validator Validator
 }
 

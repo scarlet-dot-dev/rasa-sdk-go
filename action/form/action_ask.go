@@ -32,7 +32,7 @@ func (a *AskForSlotAction) ActionName() string {
 
 // Run implements action.Handler.
 func (a *AskForSlotAction) Run(
-	ctx *action.Context,
+	ctx action.Context,
 	disp *action.CollectingDispatcher,
 ) (events rasa.Events, err error) {
 	return a.Asker.Ask(ctx, disp)
@@ -49,5 +49,5 @@ type SlotAsker interface {
 	Slot() string
 
 	// Ask should execute the action handling.
-	Ask(ctx *action.Context, disp *action.CollectingDispatcher) (events rasa.Events, err error)
+	Ask(ctx action.Context, disp *action.CollectingDispatcher) (events rasa.Events, err error)
 }

@@ -19,7 +19,7 @@ type Handler interface {
 	// The Context passed to Run is the context of the HTTP request sent by
 	// Rasa's engine.
 	Run(
-		ctx *Context,
+		ctx Context,
 		dispatcher *CollectingDispatcher,
 	) (events rasa.Events, err error)
 }

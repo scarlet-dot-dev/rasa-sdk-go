@@ -40,15 +40,15 @@ func (a *QueryAction) ActionName() string {
 // object type, multiple objects of the requested type are returned from the
 // knowledge base.
 func (a *QueryAction) Run(
-	ctx *action.Context,
+	ctx action.Context,
 	disp *action.CollectingDispatcher,
 ) (events rasa.Events, err error) {
 	kctx := &Context{ctx}
 
 	// get slots
-	objType, hasObjType := ctx.Tracker.Slots[SlotObjectType].(string)
-	lastObjType, hasLastObjType := ctx.Tracker.Slots[SlotLastObjectType].(string)
-	attr, hasAttr := ctx.Tracker.Slots[SlotAttribute].(string)
+	objType, hasObjType := ctx.Tracker().Slots[SlotObjectType].(string)
+	lastObjType, hasLastObjType := ctx.Tracker().Slots[SlotLastObjectType].(string)
+	attr, hasAttr := ctx.Tracker().Slots[SlotAttribute].(string)
 
 	// be sure to reject empty as non-existent
 	hasObjType = hasObjType && len(objType) > 0

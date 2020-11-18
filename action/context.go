@@ -16,13 +16,35 @@ import (
 
 // Context contains request specific context, such as a logger for the specific
 // request with tracing information.
-type Context struct {
+type Context interface {
+	Logger
+
+	// Context returns the Context of the action request that triggered the
+	// execution of the action handler.
+	Context() context.Context
+
+	Tracker() *rasa.Tracker
+	Domain() *rasa.Domain
+
+	// Now returns the current time in the wrapper type rasa.Time.
+	Now() rasa.Time
+
+	SetSlot(name string, val interface{}) rasa.SlotSet
+	ResetSlot(name string) rasa.SlotSet
+	EntityValue(name, role, group string) (value rasa.EntityValue)
+	EntityValues(entity, role, group string) (values []string)
+	Slot(name string) (val interface{}, ok bool)
+	SlotAs(name string, dst interface{}) (ok bool)
+}
+
+// contextImpl implements the Context interface for the
+type contextImpl struct {
 
 	//
-	Tracker *rasa.Tracker
+	tracker *rasa.Tracker
 
 	//
-	Domain *rasa.Domain
+	domain *rasa.Domain
 
 	//
 	nowfn func() time.Time
@@ -33,44 +55,54 @@ type Context struct {
 }
 
 // ensure interfaces.
-var _ Logger = (*Context)(nil)
+var _ Logger = (*contextImpl)(nil)
+var _ Context = (*contextImpl)(nil)
 
-// Context returns the Context of the action request that triggered the
-// execution of the action handler.
-func (c *Context) Context() context.Context {
+// Context implements Context.
+func (c *contextImpl) Context() context.Context {
 	return c.context
 }
 
+// Tracker implements Context.
+func (c *contextImpl) Tracker() *rasa.Tracker {
+	return c.tracker
+}
+
+// Domain implements Context.
+func (c *contextImpl) Domain() *rasa.Domain {
+	return c.domain
+}
+
 // Debugf impements Logger.
-func (c *Context) Debugf(format string, args ...interface{}) {
+func (c *contextImpl) Debugf(format string, args ...interface{}) {
 	if c.logger != nil {
 		c.logger.Debugf(format, args...)
 	}
 }
 
 // Infof implements Logger.
-func (c *Context) Infof(format string, args ...interface{}) {
+func (c *contextImpl) Infof(format string, args ...interface{}) {
 	if c.logger != nil {
 		c.logger.Infof(format, args...)
 	}
 }
 
 // Warnf implements Logger.
-func (c *Context) Warnf(format string, args ...interface{}) {
+func (c *contextImpl) Warnf(format string, args ...interface{}) {
 	if c.logger != nil {
 		c.logger.Warnf(format, args...)
 	}
 }
 
 // Errorf implements Logger.
-func (c *Context) Errorf(format string, args ...interface{}) {
+func (c *contextImpl) Errorf(format string, args ...interface{}) {
 	if c.logger != nil {
 		c.logger.Errorf(format, args...)
 	}
 }
 
 // SetSlot TODO
-func (c *Context) SetSlot(name string, val interface{}) rasa.SlotSet {
+func (c *contextImpl) SetSlot(name string, val interface{}) rasa.SlotSet {
 	return rasa.SlotSet{
 		Timestamp: rasa.Time(time.Now()),
 		Key:       name,
@@ -79,7 +111,7 @@ func (c *Context) SetSlot(name string, val interface{}) rasa.SlotSet {
 }
 
 // ResetSlot TODO
-func (c *Context) ResetSlot(name string) rasa.SlotSet {
+func (c *contextImpl) ResetSlot(name string) rasa.SlotSet {
 	return rasa.SlotSet{
 		Timestamp: rasa.Time(time.Now()),
 		Key:       name,
@@ -88,7 +120,7 @@ func (c *Context) ResetSlot(name string) rasa.SlotSet {
 }
 
 // Now returns the current time in the wrapper type rasa.Time.
-func (c *Context) Now() rasa.Time {
+func (c *contextImpl) Now() rasa.Time {
 	if c.nowfn != nil {
 		return rasa.Time(c.nowfn())
 	}
@@ -96,7 +128,7 @@ func (c *Context) Now() rasa.Time {
 }
 
 // EntityValue TODO
-func (c *Context) EntityValue(
+func (c *contextImpl) EntityValue(
 	name, role, group string,
 ) (value rasa.EntityValue) {
 	raw := c.EntityValues(name, role, group)
@@ -109,21 +141,21 @@ func (c *Context) EntityValue(
 }
 
 // EntityValues TODO
-func (c *Context) EntityValues(
+func (c *contextImpl) EntityValues(
 	entity, role, group string,
 ) (values []string) {
-	values = c.Tracker.LatestEntityValues(entity, role, group)
+	values = c.tracker.LatestEntityValues(entity, role, group)
 	return
 }
 
 // Slot TODO
-func (c *Context) Slot(name string) (val interface{}, ok bool) {
-	val, ok = c.Tracker.Slots[name]
+func (c *contextImpl) Slot(name string) (val interface{}, ok bool) {
+	val, ok = c.tracker.Slots[name]
 	return
 }
 
 // SlotAs TODO
-func (c *Context) SlotAs(name string, dst interface{}) (ok bool) {
+func (c *contextImpl) SlotAs(name string, dst interface{}) (ok bool) {
 	val, exists := c.Slot(name)
 	if !exists {
 		return

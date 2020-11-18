@@ -125,11 +125,11 @@ func (s *Server) handleWebhook(ctx context.Context, r *http.Request) (response i
 	// handle action
 	disp := CollectingDispatcher{} // non-nil
 	events, err := handler.Run(
-		&Context{
+		&contextImpl{
 			context: ctx,
 			logger:  s.Logger,
-			Tracker: req.Tracker,
-			Domain:  req.Domain,
+			tracker: req.Tracker,
+			domain:  req.Domain,
 		},
 		&disp,
 	)

@@ -30,7 +30,7 @@ func (testHandlerNoEvent) ActionName() string    { return "action_no_event" }
 func (testHandlerNoDispatch) ActionName() string { return "action_no_dispatch" }
 func (testHandlerErr) ActionName() string        { return "action_error" }
 
-func (testHandler1) Run(ctx *Context, dispatcher *CollectingDispatcher) (events rasa.Events, err error) {
+func (testHandler1) Run(ctx Context, dispatcher *CollectingDispatcher) (events rasa.Events, err error) {
 	dispatcher.Utter(&rasa.Message{
 		Text: "test string",
 	})
@@ -41,14 +41,14 @@ func (testHandler1) Run(ctx *Context, dispatcher *CollectingDispatcher) (events 
 	return
 }
 
-func (testHandlerNoEvent) Run(ctx *Context, dispatcher *CollectingDispatcher) (events rasa.Events, err error) {
+func (testHandlerNoEvent) Run(ctx Context, dispatcher *CollectingDispatcher) (events rasa.Events, err error) {
 	dispatcher.Utter(&rasa.Message{
 		Text: "test string",
 	})
 	return
 }
 
-func (testHandlerNoDispatch) Run(ctx *Context, dispatcher *CollectingDispatcher) (events rasa.Events, err error) {
+func (testHandlerNoDispatch) Run(ctx Context, dispatcher *CollectingDispatcher) (events rasa.Events, err error) {
 	events = append(events, &rasa.SlotSet{
 		Key:   "test",
 		Value: "420",
@@ -56,7 +56,7 @@ func (testHandlerNoDispatch) Run(ctx *Context, dispatcher *CollectingDispatcher)
 	return
 }
 
-func (testHandlerErr) Run(ctx *Context, dispatcher *CollectingDispatcher) (events rasa.Events, err error) {
+func (testHandlerErr) Run(ctx Context, dispatcher *CollectingDispatcher) (events rasa.Events, err error) {
 	err = errors.New("test error")
 	return
 }

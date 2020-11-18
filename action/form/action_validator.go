@@ -38,7 +38,7 @@ func (a *ValidatorAction) ActionName() string {
 
 // Run implements action.Handler.
 func (a *ValidatorAction) Run(
-	actx *action.Context,
+	actx action.Context,
 	disp *action.CollectingDispatcher,
 ) (events rasa.Events, err error) {
 	// form context for Handler methods
@@ -80,5 +80,5 @@ type ValidatorEmbed struct{}
 
 // Validate implements Validator.
 func (ValidatorEmbed) Validate(ctx *ValidatorContext, disp *action.CollectingDispatcher) (events rasa.Events, err error) {
-	return ctx.ValidateSlots(disp, ctx.Tracker.SlotsToValidate())
+	return ctx.ValidateSlots(disp, ctx.Tracker().SlotsToValidate())
 }
