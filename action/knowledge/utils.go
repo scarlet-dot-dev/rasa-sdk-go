@@ -7,8 +7,6 @@
 package knowledge
 
 import (
-	"time"
-
 	"go.scarlet.dev/rasa"
 )
 
@@ -18,9 +16,9 @@ import (
 // mention, such as "first one" or "it".
 func getObjectName(ctx *Context, omapper OrdinalMapper, useLastObjectMention bool) (val string, resolved bool) {
 	var mention string
-	mentionOK := ctx.SlotAs(SlotMention, &mention)
+	mentionOK := ctx.Tracker().SlotAs(SlotMention, &mention)
 	var objType string
-	_ = ctx.SlotAs(SlotObjectType, &objType)
+	_ = ctx.Tracker().SlotAs(SlotObjectType, &objType)
 
 	if mentionOK && mention != "" {
 		val, resolved = resolveMention(ctx, omapper)
@@ -28,14 +26,14 @@ func getObjectName(ctx *Context, omapper OrdinalMapper, useLastObjectMention boo
 	}
 
 	var objName string
-	objNameOK := ctx.SlotAs(objType, &objName)
+	objNameOK := ctx.Tracker().SlotAs(objType, &objName)
 	if objNameOK && objName != "" {
 		val, resolved = objName, true
 		return
 	}
 
 	if useLastObjectMention {
-		resolved = ctx.SlotAs(SlotLastObject, &val)
+		resolved = ctx.Tracker().SlotAs(SlotLastObject, &val)
 		return
 	}
 
@@ -55,13 +53,13 @@ func getObjectName(ctx *Context, omapper OrdinalMapper, useLastObjectMention boo
 // user is referring to the last mentioned object in the conversation.
 func resolveMention(ctx *Context, omapper OrdinalMapper) (value string, resolved bool) {
 	var mention string
-	mentionOK := ctx.SlotAs(SlotMention, &mention)
+	mentionOK := ctx.Tracker().SlotAs(SlotMention, &mention)
 	var listedItems []string
-	listedItemsOK := ctx.SlotAs(SlotListedObjects, listedItems)
+	listedItemsOK := ctx.Tracker().SlotAs(SlotListedObjects, listedItems)
 	var lastObj string
-	lastObjOK := ctx.SlotAs(SlotLastObject, &lastObj)
-	lastObjType, _ := ctx.Slot(SlotLastObjectType)
-	currObjType, _ := ctx.Slot(SlotObjectType)
+	lastObjOK := ctx.Tracker().SlotAs(SlotLastObject, &lastObj)
+	lastObjType, _ := ctx.Tracker().Slot(SlotLastObjectType)
+	currObjType, _ := ctx.Tracker().Slot(SlotObjectType)
 
 	if !mentionOK || mention == "" {
 		return
@@ -127,9 +125,8 @@ func resetAttributeSlots(ctx *Context, attrs []string) (events rasa.Events) {
 		attrVal, ok := ctx.Tracker().Slots[attr]
 		if ok && attrVal != nil {
 			events = append(events, rasa.SlotSet{
-				Key:       attr,
-				Value:     nil,
-				Timestamp: rasa.Time(time.Now()),
+				Key:   attr,
+				Value: nil,
 			})
 		}
 	}

@@ -82,7 +82,7 @@ func (a *QueryAction) queryObjects(
 ) (events rasa.Events, err error) {
 	//
 	var objType string
-	_ = ctx.SlotAs(SlotObjectType, &objType)
+	_ = ctx.Tracker().SlotAs(SlotObjectType, &objType)
 
 	//
 	ts, err := a.KnowledgeBase.ForType(objType)
@@ -114,12 +114,12 @@ func (a *QueryAction) queryObjects(
 	// build the return events
 	events = append(
 		events,
-		ctx.SetSlot(SlotObjectType, objType),
-		ctx.ResetSlot(SlotMention),
-		ctx.ResetSlot(SlotAttribute),
-		ctx.SetSlot(SlotLastObject, lastObjID),
-		ctx.SetSlot(SlotLastObjectType, objType),
-		ctx.SetSlot(SlotListedObjects, listedObjectIDs),
+		action.SetSlot(SlotObjectType, objType),
+		action.ResetSlot(SlotMention),
+		action.ResetSlot(SlotAttribute),
+		action.SetSlot(SlotLastObject, lastObjID),
+		action.SetSlot(SlotLastObjectType, objType),
+		action.SetSlot(SlotListedObjects, listedObjectIDs),
 	)
 	events = append(events, resetAttributeSlots(ctx, objAttrs)...)
 	return
@@ -133,9 +133,9 @@ func (a *QueryAction) queryAttribute(
 ) (events rasa.Events, err error) {
 	//
 	var objType string
-	_ = ctx.SlotAs(SlotObjectType, &objType)
+	_ = ctx.Tracker().SlotAs(SlotObjectType, &objType)
 	var attr string
-	attrOK := ctx.SlotAs(SlotAttribute, &attr)
+	attrOK := ctx.Tracker().SlotAs(SlotAttribute, &attr)
 
 	otype, err := a.KnowledgeBase.ForType(objType)
 	if err != nil {
@@ -145,14 +145,14 @@ func (a *QueryAction) queryAttribute(
 	oname, resolved := getObjectName(ctx, a.KnowledgeBase.OrdinalMapping(), !a.IgnoreLastObjectMention)
 	if !resolved || !attrOK {
 		a.utterAskRephrase(disp)
-		events = append(events, ctx.ResetSlot(SlotMention))
+		events = append(events, action.ResetSlot(SlotMention))
 		return
 	}
 
 	obj := otype.GetObject(oname)
 	if obj == nil || !sliceContains(otype.Attributes(), attr) {
 		a.utterAskRephrase(disp)
-		events = append(events, ctx.ResetSlot(SlotMention))
+		events = append(events, action.ResetSlot(SlotMention))
 		return
 	}
 

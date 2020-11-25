@@ -7,8 +7,6 @@
 package form
 
 import (
-	"time"
-
 	"go.scarlet.dev/rasa"
 	"go.scarlet.dev/rasa/action"
 )
@@ -37,12 +35,10 @@ func (c *ValidatorContext) ValidateSlots(
 	}
 
 	// turn validated slots into SlotSet events
-	timestamp := rasa.Time(time.Now())
 	for key := range sc {
 		events = append(events, rasa.SlotSet{
-			Timestamp: timestamp,
-			Key:       key,
-			Value:     sc[key],
+			Key:   key,
+			Value: sc[key],
 		})
 	}
 	return
@@ -52,8 +48,7 @@ func (c *ValidatorContext) ValidateSlots(
 // slot.
 func (c *ValidatorContext) RequestSlot(slot string) rasa.Event {
 	return &rasa.SlotSet{
-		Timestamp: c.Now(),
-		Key:       RequestedSlot,
-		Value:     slot,
+		Key:   RequestedSlot,
+		Value: slot,
 	}
 }

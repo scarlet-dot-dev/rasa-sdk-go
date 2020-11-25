@@ -8,12 +8,13 @@ package rasa
 
 import (
 	"fmt"
+	"reflect"
 )
 
 // Tracker contains the state of the Tracker sent to the action server by the
 // Rasa engine.
 type Tracker struct {
-	SenderID         string       `json:"sender_id"` // TODO(ed): verify if this field is ever set
+	SenderID         string       `json:"sender_id"`
 	Slots            Slots        `json:"slots,omitempty"`
 	LatestMessage    *ParseResult `json:"latest_message,omitempty"`
 	LatestActionName string       `json:"latest_action_name,omitempty"`
@@ -21,15 +22,21 @@ type Tracker struct {
 	Paused           bool         `json:"paused"`
 	FollowupAction   string       `json:"followup_action,omitempty"`
 	ActiveLoop       *TActiveLoop `json:"active_loop,omitempty"`
-	// These fields are unused in rasa_sdk
-	// ConversationID     string       `json:"conversation_id"`
-	// LatestEventTime    Time         `json:"latest_event_time,omitempty"`
-	// LatestInputChannel string       `json:"latest_input_channel,omitempty"`
 }
 
 // HasSlots returns whether there are any Slots present in the Tracker.
 func (t *Tracker) HasSlots() bool {
 	return len(t.Slots) > 0
+}
+
+// HasActiveForm returns whether the Tracker state represents an active Form.
+func (t *Tracker) HasActiveForm() bool {
+	return t.HasActiveLoop()
+}
+
+// HasActiveLoop returns whether the Tracker state represents an active Loop.
+func (t *Tracker) HasActiveLoop() bool {
+	return t.ActiveLoop.IsActive()
 }
 
 // LatestEntityValues returns the entity values found for the passed entity name
@@ -57,14 +64,52 @@ func (t *Tracker) LatestEntityValues(entity, role, group string) (values []strin
 	return
 }
 
-// HasActiveForm returns whether the Tracker state represents an active Form.
-func (t *Tracker) HasActiveForm() bool {
-	return t.HasActiveLoop()
+// Entity returns the current value of the requested entity as an EntityValue.
+func (t *Tracker) Entity(name, role, group string) (value EntityValue) {
+	raw := t.EntityValues(name, role, group)
+	if len(raw) == 1 {
+		value = StringValue(raw[0])
+		return
+	}
+	value = SliceValue(raw)
+	return
 }
 
-// HasActiveLoop returns whether the Tracker state represents an active Loop.
-func (t *Tracker) HasActiveLoop() bool {
-	return t.ActiveLoop.IsActive()
+// EntityValues returns the current value of the requested entity as a
+// slice. The slice may be empty, and may contain 0 or more entries.
+func (t *Tracker) EntityValues(
+	entity, role, group string,
+) (values []string) {
+	values = t.LatestEntityValues(entity, role, group)
+	return
+}
+
+// Slot returns the value of the slot as an interface. The `ok` flag
+// indicates whether the slot was present.
+func (t *Tracker) Slot(name string) (val interface{}, ok bool) {
+	val, ok = t.Slots[name]
+	return
+}
+
+// SlotAs attempts to assign the value of the slot to the `dst` pointer. The
+// `ok` flag indicates whether the slot was present, and successfully
+// assigned to `dst`.
+//
+// Passing a non-assignable type to `dst` leads to undefined behaviour.
+func (t *Tracker) SlotAs(name string, dst interface{}) (ok bool) {
+	val, exists := t.Slot(name)
+	if !exists {
+		return
+	}
+
+	rdst := reflect.ValueOf(dst)
+	rval := reflect.ValueOf(val)
+	if ok = rdst.CanSet() && rval.Type().AssignableTo(rdst.Type()); !ok {
+		return
+	}
+
+	rdst.Set(reflect.ValueOf(val))
+	return
 }
 
 // SlotsToValidate returns the slots which were recently set.
