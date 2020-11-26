@@ -52,3 +52,8 @@ func (t Time) MarshalJSON() ([]byte, error) {
 	// default serialize as 0, in stead of "nothing".
 	return json.Marshal(0)
 }
+
+// AsTime returns t as an instance of time.Time from the standard library.
+func (t Time) AsTime() time.Time {
+	return time.Time(t)
+}

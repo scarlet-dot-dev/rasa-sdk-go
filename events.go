@@ -24,14 +24,14 @@ const (
 	EventTypeActionExecuted          = EventType("action")
 	EventTypeActionExecutionRejected = EventType("action_execution_rejected")
 	EventTypeActionReverted          = EventType("undo")
+	EventTypeActiveLoop              = EventType("active_loop")
 	EventTypeAgentUttered            = EventType("agent")
 	EventTypeAllSlotsReset           = EventType("reset_slots")
 	EventTypeBotUttered              = EventType("bot")
 	EventTypeConversationPaused      = EventType("pause")
 	EventTypeConversationResumed     = EventType("resume")
 	EventTypeFollowupAction          = EventType("followup")
-	EventTypeActiveLoop              = EventType("form")
-	EventTypeLoopInterrupted         = EventType("form_validation")
+	EventTypeLoopInterrupted         = EventType("loop_interrupted")
 	EventTypeReminderCancelled       = EventType("cancel_reminder")
 	EventTypeReminderScheduled       = EventType("reminder")
 	EventTypeRestarted               = EventType("restart")
@@ -47,6 +47,10 @@ type Event interface {
 	// Type returns the constant representing the event's type in a marshalled
 	// JSON object.
 	Type() EventType
+
+	// Timestamp returns the timestamp associated with the event as an instance
+	// of time.Time.
+	Time() time.Time
 }
 
 // Events implements JSON Unmarshaling of Rasa's Event types.
@@ -107,6 +111,8 @@ func unmarshalEvent(data []byte) (evt Event, err error) {
 		evt = new(ActionExecutionRejected)
 	case EventTypeActionReverted:
 		evt = new(ActionReverted)
+	case EventTypeActiveLoop:
+		evt = new(ActiveLoop)
 	case EventTypeAgentUttered:
 		evt = new(AgentUttered)
 	case EventTypeAllSlotsReset:
@@ -119,6 +125,8 @@ func unmarshalEvent(data []byte) (evt Event, err error) {
 		evt = new(ConversationResumed)
 	case EventTypeFollowupAction:
 		evt = new(FollowupAction)
+	case EventTypeLoopInterrupted:
+		evt = new(LoopInterrupted)
 	case EventTypeReminderCancelled:
 		evt = new(ReminderCancelled)
 	case EventTypeReminderScheduled:
@@ -183,6 +191,12 @@ type ActionReverted struct {
 	Timestamp Time `json:"timestamp,omitempty"`
 }
 
+// ActiveLoop TODO
+type ActiveLoop struct {
+	Timestamp Time   `json:"timestamp,omitempty"`
+	Name      string `json:"name,omitempty"`
+}
+
 // AgentUttered TODO
 type AgentUttered struct {
 	Timestamp Time    `json:"timestamp,omitempty"`
@@ -217,12 +231,6 @@ type ConversationResumed struct {
 type FollowupAction struct {
 	Timestamp  Time   `json:"timestamp,omitempty"`
 	ActionName string `json:"name"`
-}
-
-// ActiveLoop TODO
-type ActiveLoop struct {
-	Timestamp Time   `json:"timestamp,omitempty"`
-	Name      string `json:"name,omitempty"`
 }
 
 // LoopInterrupted TODO
@@ -294,6 +302,9 @@ func (ActionExecutionRejected) Type() EventType { return EventTypeActionExecutio
 func (ActionReverted) Type() EventType { return EventTypeActionReverted }
 
 // Type implements Event.
+func (ActiveLoop) Type() EventType { return EventTypeActiveLoop }
+
+// Type implements Event.
 func (AgentUttered) Type() EventType { return EventTypeAgentUttered }
 
 // Type implements Event.
@@ -310,9 +321,6 @@ func (ConversationResumed) Type() EventType { return EventTypeConversationResume
 
 // Type implements Event.
 func (FollowupAction) Type() EventType { return EventTypeFollowupAction }
-
-// Type implements Event.
-func (ActiveLoop) Type() EventType { return EventTypeActiveLoop }
 
 // Type implements Event.
 func (LoopInterrupted) Type() EventType { return EventTypeLoopInterrupted }
@@ -341,6 +349,101 @@ func (UserUtteranceReverted) Type() EventType { return EventTypeUserUtteranceRev
 // Type implements Event.
 func (UserUttered) Type() EventType { return EventTypeUserUttered }
 
+// Time implements Event.
+func (e *ActionExecuted) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e ActionExecutionRejected) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e ActionReverted) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e ActiveLoop) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e AgentUttered) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e AllSlotsReset) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e BotUttered) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e ConversationPaused) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e ConversationResumed) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e FollowupAction) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e LoopInterrupted) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e ReminderCancelled) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e ReminderScheduled) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e Restarted) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e SessionStarted) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e SlotSet) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e StoryExported) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e UserUtteranceReverted) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
+func (e UserUttered) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e *ActionExecuted) MarshalJSON() ([]byte, error) { return marshalEvent(e) }
 
@@ -349,6 +452,9 @@ func (e *ActionExecutionRejected) MarshalJSON() ([]byte, error) { return marshal
 
 // MarshalJSON implements json.Marshaler.
 func (e *ActionReverted) MarshalJSON() ([]byte, error) { return marshalEvent(e) }
+
+// MarshalJSON implements json.Marshaler.
+func (e *ActiveLoop) MarshalJSON() ([]byte, error) { return marshalEvent(e) }
 
 // MarshalJSON implements json.Marshaler.
 func (e *AgentUttered) MarshalJSON() ([]byte, error) { return marshalEvent(e) }
@@ -367,9 +473,6 @@ func (e *ConversationResumed) MarshalJSON() ([]byte, error) { return marshalEven
 
 // MarshalJSON implements json.Marshaler.
 func (e *FollowupAction) MarshalJSON() ([]byte, error) { return marshalEvent(e) }
-
-// MarshalJSON implements json.Marshaler.
-func (e *ActiveLoop) MarshalJSON() ([]byte, error) { return marshalEvent(e) }
 
 // MarshalJSON implements json.Marshaler.
 func (e *LoopInterrupted) MarshalJSON() ([]byte, error) { return marshalEvent(e) }
@@ -402,13 +505,13 @@ func (e *UserUttered) MarshalJSON() ([]byte, error) { return marshalEvent(e) }
 var _ Event = (*ActionExecuted)(nil)
 var _ Event = (*ActionExecutionRejected)(nil)
 var _ Event = (*ActionReverted)(nil)
+var _ Event = (*ActiveLoop)(nil)
 var _ Event = (*AgentUttered)(nil)
 var _ Event = (*AllSlotsReset)(nil)
 var _ Event = (*BotUttered)(nil)
 var _ Event = (*ConversationPaused)(nil)
 var _ Event = (*ConversationResumed)(nil)
 var _ Event = (*FollowupAction)(nil)
-var _ Event = (*ActiveLoop)(nil)
 var _ Event = (*LoopInterrupted)(nil)
 var _ Event = (*ReminderCancelled)(nil)
 var _ Event = (*ReminderScheduled)(nil)
@@ -423,13 +526,13 @@ var _ Event = (*UserUttered)(nil)
 var _ json.Marshaler = (*ActionExecuted)(nil)
 var _ json.Marshaler = (*ActionExecutionRejected)(nil)
 var _ json.Marshaler = (*ActionReverted)(nil)
+var _ json.Marshaler = (*ActiveLoop)(nil)
 var _ json.Marshaler = (*AgentUttered)(nil)
 var _ json.Marshaler = (*AllSlotsReset)(nil)
 var _ json.Marshaler = (*BotUttered)(nil)
 var _ json.Marshaler = (*ConversationPaused)(nil)
 var _ json.Marshaler = (*ConversationResumed)(nil)
 var _ json.Marshaler = (*FollowupAction)(nil)
-var _ json.Marshaler = (*ActiveLoop)(nil)
 var _ json.Marshaler = (*LoopInterrupted)(nil)
 var _ json.Marshaler = (*ReminderCancelled)(nil)
 var _ json.Marshaler = (*ReminderScheduled)(nil)
