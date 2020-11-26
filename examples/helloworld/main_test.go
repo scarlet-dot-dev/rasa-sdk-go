@@ -1,0 +1,18 @@
+// Copyright (c) 2020 Eddy <eddy@scarlet.dev>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+// Package main contains an implementation of a "hello world" example to demo
+// the usage of the Rasa SDK.
+package main
+
+import "testing"
+
+// TestCompiles just tests if the package properly gets compiled.
+//
+// TODO(ed): add example tests.
+func TestCompiles(t *testing.T) {
+	// no-op
+}
