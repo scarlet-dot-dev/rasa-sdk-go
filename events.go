@@ -278,10 +278,10 @@ type UserUtteranceReverted struct {
 
 // UserUttered TODO
 type UserUttered struct {
-	Timestamp    Time    `json:"timestamp,omitempty"`
-	Text         string  `json:"text,omitempty"`
-	ParseData    JSONMap `json:"parse_data,omitempty"`
-	InputChannel string  `json:"input_channel,omitempty"`
+	Timestamp    Time         `json:"timestamp,omitempty"`
+	Text         string       `json:"text,omitempty"`
+	ParseData    *ParseResult `json:"parse_data,omitempty"`
+	InputChannel string       `json:"input_channel,omitempty"`
 }
 
 // Type implements Event.
