@@ -290,6 +290,7 @@ type UserUttered struct {
 	Text         string       `json:"text,omitempty"`
 	ParseData    *ParseResult `json:"parse_data,omitempty"`
 	InputChannel string       `json:"input_channel,omitempty"`
+	Metadata     JSONMap      `json:"metadata,omitempty"` // experimental
 }
 
 // Type implements Event.
