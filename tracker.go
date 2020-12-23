@@ -41,7 +41,7 @@ func (t *Tracker) HasActiveLoop() bool {
 
 // LatestEntityValues returns the entity values found for the passed entity name
 // in the latest message.
-func (t *Tracker) LatestEntityValues(entity, role, group string) (values []string) {
+func (t *Tracker) LatestEntityValues(entity, role, group string) (values []interface{}) {
 	if len(t.LatestMessage.Entities) == 0 {
 		return nil
 	}
@@ -64,22 +64,11 @@ func (t *Tracker) LatestEntityValues(entity, role, group string) (values []strin
 	return
 }
 
-// Entity returns the current value of the requested entity as an EntityValue.
-func (t *Tracker) Entity(name, role, group string) (value EntityValue) {
-	raw := t.EntityValues(name, role, group)
-	if len(raw) == 1 {
-		value = StringValue(raw[0])
-		return
-	}
-	value = SliceValue(raw)
-	return
-}
-
 // EntityValues returns the current value of the requested entity as a
 // slice. The slice may be empty, and may contain 0 or more entries.
 func (t *Tracker) EntityValues(
 	entity, role, group string,
-) (values []string) {
+) (values []interface{}) {
 	values = t.LatestEntityValues(entity, role, group)
 	return
 }
@@ -179,13 +168,14 @@ type Intent struct {
 
 // Entity describes an entity and its detected location, value, and confidence.
 type Entity struct {
-	Start      int     `json:"start"`
-	End        int     `json:"end"`
-	Value      string  `json:"value"`
-	Entity     string  `json:"entity"`
-	Confidence float64 `json:"confidence"`
-	Group      string  `json:"group,omitempty"`
-	Role       string  `json:"role,omitempty"`
+	Start      int         `json:"start"`
+	End        int         `json:"end"`
+	Value      interface{} `json:"value"`
+	Entity     string      `json:"entity"`
+	Confidence float64     `json:"confidence"`
+	Group      string      `json:"group,omitempty"`
+	Role       string      `json:"role,omitempty"`
+	Extractor  string      `json:"extractor"`
 }
 
 // Slots is a wrapper type around slots.
@@ -208,58 +198,6 @@ func (m Slots) Update(s Slots) {
 //
 // String returns a simple json-like representation of the map's values.
 func (m Slots) String() string {
+	// TODO(ed): implement custom Stringer
 	return fmt.Sprintf("%#v", m)
-}
-
-// EntityValue specifies an interface over extracted entity values that can be
-// either a single string or a list of strings.
-type EntityValue interface {
-	AsString() string
-	AsSlice() []string
-	Count() int
-}
-
-// ensure interfaces
-var _ EntityValue = (StringValue)("")
-var _ EntityValue = (SliceValue)(nil)
-
-// StringValue implements the EntityValue interface for entities that only
-// contain a single value.
-type StringValue string
-
-// AsString implements EntityValue
-func (v StringValue) AsString() string {
-	return string(v)
-}
-
-// AsSlice implements EntityValue.
-func (v StringValue) AsSlice() []string {
-	return []string{string(v)}
-}
-
-// Count implements EntityValue.
-func (v StringValue) Count() int {
-	return 1
-}
-
-// SliceValue implements the EntityValue interface for entities that contain
-// more than one value.
-type SliceValue []string
-
-// AsString implements EntityValue
-func (v SliceValue) AsString() string {
-	if len(v) > 0 {
-		return v[0]
-	}
-	return ""
-}
-
-// AsSlice implements EntityValue.
-func (v SliceValue) AsSlice() []string {
-	return v
-}
-
-// Count implements EntityValue.
-func (v SliceValue) Count() int {
-	return len(v)
 }
