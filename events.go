@@ -38,6 +38,7 @@ const (
 	EventTypeSessionStarted          = EventType("session_started")
 	EventTypeSlotSet                 = EventType("slot")
 	EventTypeStoryExported           = EventType("export")
+	EventTypeUserFeaturization       = EventType("user_featurization")
 	EventTypeUserUtteranceReverted   = EventType("rewind")
 	EventTypeUserUttered             = EventType("user")
 )
@@ -139,6 +140,8 @@ func unmarshalEvent(data []byte) (evt Event, err error) {
 		evt = new(SlotSet)
 	case EventTypeStoryExported:
 		evt = new(StoryExported)
+	case EventTypeUserFeaturization:
+		evt = new(UserFeaturization)
 	case EventTypeUserUtteranceReverted:
 		evt = new(UserUtteranceReverted)
 	case EventTypeUserUttered:
@@ -279,6 +282,12 @@ type StoryExported struct {
 	Timestamp Time `json:"timestamp,omitempty"`
 }
 
+// UserFeaturization TODO
+type UserFeaturization struct {
+	Timestamp               Time `json:"timestamp,omitempty"`
+	UseTextForFeaturization bool `json:"use_text_for_featurization"`
+}
+
 // UserUtteranceReverted TODO
 type UserUtteranceReverted struct {
 	Timestamp Time `json:"timestamp,omitempty"`
@@ -343,6 +352,9 @@ func (SlotSet) Type() EventType { return EventTypeSlotSet }
 
 // Type implements Event.
 func (StoryExported) Type() EventType { return EventTypeStoryExported }
+
+// Type implements Event.
+func (UserFeaturization) Type() EventType { return EventTypeUserFeaturization }
 
 // Type implements Event.
 func (UserUtteranceReverted) Type() EventType { return EventTypeUserUtteranceReverted }
@@ -436,6 +448,11 @@ func (e StoryExported) Time() time.Time {
 }
 
 // Time implements Event.
+func (e UserFeaturization) Time() time.Time {
+	return e.Timestamp.AsTime()
+}
+
+// Time implements Event.
 func (e UserUtteranceReverted) Time() time.Time {
 	return e.Timestamp.AsTime()
 }
@@ -497,6 +514,9 @@ func (e *SlotSet) MarshalJSON() ([]byte, error) { return marshalEvent(e) }
 func (e *StoryExported) MarshalJSON() ([]byte, error) { return marshalEvent(e) }
 
 // MarshalJSON implements json.Marshaler.
+func (e *UserFeaturization) MarshalJSON() ([]byte, error) { return marshalEvent(e) }
+
+// MarshalJSON implements json.Marshaler.
 func (e *UserUtteranceReverted) MarshalJSON() ([]byte, error) { return marshalEvent(e) }
 
 // MarshalJSON implements json.Marshaler.
@@ -520,6 +540,7 @@ var _ Event = (*Restarted)(nil)
 var _ Event = (*SessionStarted)(nil)
 var _ Event = (*SlotSet)(nil)
 var _ Event = (*StoryExported)(nil)
+var _ Event = (*UserFeaturization)(nil)
 var _ Event = (*UserUtteranceReverted)(nil)
 var _ Event = (*UserUttered)(nil)
 
@@ -541,5 +562,6 @@ var _ json.Marshaler = (*Restarted)(nil)
 var _ json.Marshaler = (*SessionStarted)(nil)
 var _ json.Marshaler = (*SlotSet)(nil)
 var _ json.Marshaler = (*StoryExported)(nil)
+var _ json.Marshaler = (*UserFeaturization)(nil)
 var _ json.Marshaler = (*UserUtteranceReverted)(nil)
 var _ json.Marshaler = (*UserUttered)(nil)
