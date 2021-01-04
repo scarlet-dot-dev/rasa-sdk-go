@@ -64,6 +64,19 @@ func (t *Tracker) LatestEntityValues(entity, role, group string) (values []inter
 	return
 }
 
+// Entity returns the current value of the requested entity, or nil if the
+// entity has no value.
+//
+// If the entity has more than one possible value, the first is returned.
+func (t *Tracker) Entity(
+	entity, role, group string,
+) (value interface{}) {
+	if values := t.LatestEntityValues(entity, role, group); len(values) >= 1 {
+		value = values[0]
+	}
+	return
+}
+
 // EntityValues returns the current value of the requested entity as a
 // slice. The slice may be empty, and may contain 0 or more entries.
 func (t *Tracker) EntityValues(
